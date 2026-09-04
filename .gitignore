@@ -1,0 +1,5 @@
+deploy/
+assets/overlays/
+__pycache__/
+*.pyc
+.env

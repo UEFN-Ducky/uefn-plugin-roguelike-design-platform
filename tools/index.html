@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roguelike Game Design Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  /* Inactive tab panes MUST hide with !important so Tailwind flex/grid
+     utilities on the pane cannot override the hide rule. */
+  .tab-pane { display: none !important; }
+  .tab-pane.is-active { display: block !important; }
+
+  html, body { height: 100%; }
+  body { background:#0b0f19; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background:#0b0f19; }
+  ::-webkit-scrollbar-thumb { background:#374151; border-radius:6px; }
+  ::-webkit-scrollbar-thumb:hover { background:#4b5563; }
+  .grid-cell { user-select:none; position:relative; z-index:1; }
+  .grid-stage { position:relative; display:inline-block; transform-origin:0 0; will-change:transform; }
+  .grid-stage .map-overlay {
+    position:absolute; inset:0; width:100%; height:100%;
+    pointer-events:none; z-index:0; object-fit:fill;
+  }
+  .grid-stage.has-overlay .grid-cell[data-terrain='empty'] {
+    background: transparent !important;
+  }
+  .grid-stage.has-overlay .grid-cell[data-terrain='floor'] {
+    background: rgba(30,41,59,0.55) !important;
+  }
+  .grid-viewport {
+    position:relative; width:100%; height:min(72vh,820px); min-height:420px;
+    overflow:hidden; border:1px solid #374151; border-radius:0.75rem; background:#0b0f19;
+    cursor:grab; touch-action:none;
+  }
+  .grid-viewport.is-panning { cursor:grabbing; }
+  .grid-viewport .grid-world { position:absolute; left:0; top:0; transform-origin:0 0; }
+  .grid-toolbar { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.5rem; }
+  .grid-toolbar button { padding:0.35rem 0.6rem; border-radius:0.5rem; background:#374151; font-size:11px; }
+  .grid-toolbar button:hover { background:#4b5563; }
+  .grid-hint { font-size:11px; color:#6b7280; }
+  .nav-item.is-active { background:#1f2937; color:#fff; border-left-color:#6366f1; }
+  .toast-in { animation: toastIn .18s ease-out; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
+  .modal-back { backdrop-filter: blur(2px); }
+  .chip-dot { width:8px; height:8px; border-radius:50%; }
+  .view-toggle { display:inline-flex; border:1px solid #374151; border-radius:0.5rem; overflow:hidden; }
+  .view-toggle button { padding:0.35rem 0.65rem; font-size:11px; background:#1f2937; color:#9ca3af; display:inline-flex; align-items:center; gap:0.35rem; }
+  .view-toggle button:hover { color:#fff; background:#374151; }
+  .view-toggle button.is-on { background:#4f46e5; color:#fff; }
+  .cat-table { width:100%; border-collapse:collapse; }
+  .cat-table th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#6b7280; padding:0.5rem 0.75rem; border-bottom:1px solid #374151; white-space:nowrap; }
+  .cat-table td { padding:0.55rem 0.75rem; border-bottom:1px solid rgba(55,65,81,0.55); font-size:12px; vertical-align:middle; }
+  .cat-table tr:hover td { background:rgba(31,41,55,0.55); }
+  .cat-table .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:#a5b4fc; }
+</style>
+</head>
+<body class="text-gray-200 antialiased">
+<div class="flex h-screen overflow-hidden">
+  <!-- SIDEBAR -->
+  <aside class="w-60 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-4 py-4 border-b border-gray-800">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center"><i data-lucide="swords" class="w-5 h-5 text-white"></i></div>
+        <div><div class="text-sm font-semibold text-white leading-tight">Roguelike</div><div class="text-[11px] text-gray-400 leading-tight">Design Platform</div></div>
+      </div>
+    </div>
+    <nav class="flex-1 py-2 overflow-y-auto" id="nav"></nav>
+    <div class="p-3 border-t border-gray-800 space-y-2 text-[11px]">
+      <div class="flex items-center gap-2"><span id="chipListenerDot" class="chip-dot bg-gray-500"></span><span id="chipListenerText" class="text-gray-400">Listener: checking…</span></div>
+      <div class="flex items-center gap-2"><span id="chipSyncDot" class="chip-dot bg-gray-500"></span><span id="chipSyncText" class="text-gray-400">Sync: unknown</span></div>
+      <div class="text-gray-600" id="chipMode">mode: standalone</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 overflow-y-auto">
+    <header class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+      <div>
+        <h1 id="pageTitle" class="text-lg font-semibold text-white">Dashboard</h1>
+        <p id="pageSub" class="text-xs text-gray-400">Per-project design source of truth · UI, MCP tools &amp; skills</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs">
+          <span id="hdrListenerDot" class="chip-dot bg-gray-500"></span><span id="hdrListenerText" class="text-gray-300">UEFN</span>
+          <span class="text-gray-600">·</span>
+          <span id="hdrSyncDot" class="chip-dot bg-gray-500"></span><span id="hdrSyncText" class="text-gray-300">sync</span>
+        </div>
+        <button onclick="RGD.pushEverything()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Push to UEFN</button>
+      </div>
+    </header>
+    <div class="p-6">
+      <section id="tab-dashboard" class="tab-pane is-active"></section>
+      <section id="tab-levels" class="tab-pane"></section>
+      <section id="tab-npcs" class="tab-pane"></section>
+      <section id="tab-items" class="tab-pane"></section>
+      <section id="tab-currencies" class="tab-pane"></section>
+      <section id="tab-weapons" class="tab-pane"></section>
+    <section id="tab-wizardry" class="tab-pane"></section>
+      <section id="tab-stats" class="tab-pane"></section>
+      <section id="tab-difficulties" class="tab-pane"></section>
+      <section id="tab-mcp" class="tab-pane"></section>
+    </div>
+  </main>
+</div>
+<div id="modalRoot"></div>
+<div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 w-80"></div>
+
+
+<script>
+/* sandbox-safe host bridge (prefs + backend RPC) */
+var RGD_BRIDGE_CHANNEL = "uefn-plugin-ui";
+var rgdBridgePending = {};
+window.addEventListener("message", function (ev) {
+  var d = ev.data;
+  if (!d || d.channel !== RGD_BRIDGE_CHANNEL) return;
+  if (d.id && rgdBridgePending[d.id]) {
+    var pending = rgdBridgePending[d.id];
+    delete rgdBridgePending[d.id];
+    if (d.ok) pending.resolve(d.result);
+    else pending.reject(new Error(d.error || "bridge error"));
+  }
+});
+function rgdBridgeCall(method, params, timeoutMs) {
+  var id = (crypto.randomUUID && crypto.randomUUID()) || String(Math.random());
+  var ms = (typeof timeoutMs === "number" && timeoutMs > 0) ? timeoutMs : 8000;
+  return new Promise(function (resolve, reject) {
+    rgdBridgePending[id] = { resolve: resolve, reject: reject };
+    try {
+      parent.postMessage({ channel: RGD_BRIDGE_CHANNEL, id: id, method: method, params: params || {} }, "*");
+    } catch (e) {
+      delete rgdBridgePending[id];
+      reject(e);
+      return;
+    }
+    setTimeout(function () {
+      if (rgdBridgePending[id]) {
+        delete rgdBridgePending[id];
+        reject(new Error("bridge timeout"));
+      }
+    }, ms);
+  });
+}
+function rgdRpc(method, params, timeoutMs) {
+  return rgdBridgeCall("plugin.call", { method: method, params: params || {} }, timeoutMs);
+}
+</script>
+
+<script>
+/* ======================================================================
+   Roguelike Game Design Platform — single-file UI.
+   The project store is the only source of truth: this panel reads and writes it
+   over the plugin bridge (rgdRpc), the same store the rgd_* MCP tools use, so the
+   panel and the AI never hold competing copies. Outside the app, where the bridge
+   does not answer, the panel stays read-only and says so.
+   ====================================================================== */
+const RGD = (() => {
+  let projectKey = '_no_project';
+  const WORLD_STEP = 512;
+
+  const GRID_MAX = 100000;
+  const DENSE_MAX_CELLS = 16384;
+  let view = { zoom:1, panX:0, panY:0, baseCell:26, fitted:false };
+  function isSparseGrid(g){ return g && typeof g==='object' && !Array.isArray(g) && !!g._sparse; }
+  function emptyCell(){ return {terrain:'empty', entity:null}; }
+  function cellKey(x,y){ return x+','+y; }
+  function getCell(lvl,x,y){
+    const g=lvl.grid;
+    if(isSparseGrid(g)){ const c=(g.cells||{})[cellKey(x,y)]; return c?{terrain:c.terrain||'empty',entity:c.entity||null}:emptyCell(); }
+    if(Array.isArray(g) && g[y] && g[y][x]) return g[y][x];
+    return emptyCell();
+  }
+  function setCell(lvl,x,y,cell){
+    const terr=(cell&&cell.terrain)||'empty'; const ent=cell&&cell.entity?cell.entity:null;
+    let g=lvl.grid;
+    if(isSparseGrid(g)){
+      g.cells=g.cells||{}; const k=cellKey(x,y);
+      if(terr==='empty'&&!ent) delete g.cells[k]; else g.cells[k]={terrain:terr,entity:ent};
+      return;
+    }
+    if(Array.isArray(g) && g[y] && g[y][x]!==undefined){ g[y][x]={terrain:terr,entity:ent}; }
+  }
+  function iterPainted(lvl){
+    const out=[]; const g=lvl.grid; const w=lvl.w|0, h=lvl.h|0;
+    if(isSparseGrid(g)){
+      Object.keys(g.cells||{}).forEach(k=>{
+        const p=k.split(','); const x=+p[0], y=+p[1]; const c=g.cells[k];
+        if(x>=0&&y>=0&&x<w&&y<h&&c&&((c.terrain&&c.terrain!=='empty')||c.entity)) out.push([x,y,c]);
+      });
+      return out;
+    }
+    if(Array.isArray(g)){
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const c=g[y]&&g[y][x]; if(c&&((c.terrain&&c.terrain!=='empty')||c.entity)) out.push([x,y,c]); }
+    }
+    return out;
+  }
+  function makeGrid(w,h,old){
+    w=clamp(w|0,4,GRID_MAX); h=clamp(h|0,4,GRID_MAX);
+    const useSparse=(w*h)>DENSE_MAX_CELLS;
+    const cells={};
+    if(isSparseGrid(old)){
+      Object.keys(old.cells||{}).forEach(k=>{
+        const p=k.split(','); const x=+p[0], y=+p[1]; const c=old.cells[k];
+        if(x>=0&&y>=0&&x<w&&y<h&&c&&((c.terrain&&c.terrain!=='empty')||c.entity)) cells[cellKey(x,y)]={terrain:c.terrain||'empty',entity:c.entity||null};
+      });
+    } else if(Array.isArray(old)){
+      for(let y=0;y<Math.min(h,old.length);y++) for(let x=0;x<Math.min(w,(old[y]||[]).length);x++){
+        const c=old[y][x]; if(c&&((c.terrain&&c.terrain!=='empty')||c.entity)) cells[cellKey(x,y)]={terrain:c.terrain||'empty',entity:c.entity||null};
+      }
+    }
+    if(useSparse) return {_sparse:true, cells};
+    const g=[]; for(let y=0;y<h;y++){ const row=[]; for(let x=0;x<w;x++){ const k=cellKey(x,y); row.push(cells[k]?{...cells[k]}:emptyCell()); } g.push(row);} return g;
+  }
+
+  const NAV = [
+    { id:'dashboard', label:'Dashboard',       icon:'layout-dashboard' },
+    { id:'levels',    label:'Levels & Maps',   icon:'map' },
+    { id:'npcs',      label:'NPCs & Enemies',  icon:'skull' },
+    { id:'items',     label:'Drops',           icon:'gem' },
+    { id:'currencies',label:'Currencies',      icon:'coins' },
+    { id:'weapons',   label:'Player Weapons',  icon:'crosshair' },
+    { id:'wizardry',  label:'Wizardry',        icon:'sparkles' },
+    { id:'stats',     label:'Game Stat Rules', icon:'sliders-horizontal' },
+    { id:'difficulties', label:'Difficulty Menu', icon:'gauge' },
+    { id:'mcp',       label:'MCP / Live Sync', icon:'plug-zap' },
+  ];
+
+  function seed() {
+    return {
+      version:4,
+      stats:[
+        {id:'hp',name:'Health',def:100},{id:'attack',name:'Attack Damage',def:20},
+        {id:'defense',name:'Defense',def:5},{id:'speed',name:'Speed',def:300},
+        {id:'range',name:'Attack Range (cm)',def:220},{id:'cooldown',name:'Attack Cooldown (s)',def:1.3},
+        {id:'chaserange',name:'Max Chase Range (cm)',def:8000},{id:'spread',name:'Spread Distance (cm)',def:260},
+        {id:'sidestep',name:'Sidestep Chance (%)',def:35}
+      ],
+      difficulties:[
+        {id:'easy',name:'Easy',index:0,enemyCountPercent:75,description:'Fewer enemies, weaker stats.'},
+        {id:'normal',name:'Normal',index:1,enemyCountPercent:100,description:'Designed wave counts and baseline tuning.'},
+        {id:'hard',name:'Hard',index:2,enemyCountPercent:150,description:'More enemies, +50% HP, +35% damage.'}
+      ],
+      npcs:[], items:[], currencies:[], weapons:[], wizardry:[], elements:[], levels:[],
+      scene:{ actors:[], lastSync:null, listener:'unknown' },
+      log:[],
+      meta:{ activeLevelId:null, activeTab:'dashboard', infusionRerollPolicy:'hub', weaponFilter:'All', wizardryFilter:'All' },
+    };
+  }
+  let state = seed();
+
+  function stripOverlayDataUrls(st){
+    try{
+      const levels=(st&&st.levels)||[];
+      for(const l of levels){
+        if(l&&l.overlay&&l.overlay._dataUrl){ const ov=Object.assign({},l.overlay); delete ov._dataUrl; l.overlay=ov; }
+      }
+    }catch(_){}
+    return st;
+  }
+  function persistableState(){
+    // Deep-ish clone without huge overlay data URLs (they blow the RPC payload).
+    if(!state.meta) state.meta={};
+    const raw=JSON.parse(JSON.stringify(state));
+    stripOverlayDataUrls(raw);
+    // Keep the store small — log is session-only.
+    if(raw.log && raw.log.length>40) raw.log=raw.log.slice(0,40);
+    return raw;
+  }
+  function paintedCount(st){
+    let n=0;
+    for(const l of (st&&st.levels)||[]){
+      const g=l&&l.grid;
+      if(g&&g._sparse&&g.cells){ n+=Object.keys(g.cells).length; continue; }
+      if(Array.isArray(g)){
+        for(let y=0;y<g.length;y++){
+          const row=g[y]; if(!row) continue;
+          for(let x=0;x<row.length;x++){
+            const c=row[x];
+            if(c&&((c.terrain&&c.terrain!=='empty')||c.entity)) n++;
+          }
+        }
+      }
+    }
+    return n;
+  }
+  /* ================= PERSISTENCE — ONE STORE, ONE WRITER =================
+     The project store (<project>/.ducky/roguelike-design/store.json) is the ONLY
+     copy of the design, read through get_store and written through set_store —
+     same shape as app Settings. No localStorage mirror, no second write path, no
+     freshness/merge heuristics: those made two copies race and silently lose edits.
+     _hydrated gates every write, so a failed load can never flush defaults over
+     real work.
+
+     Reads and writes go over the postMessage bridge (rgdRpc), NOT window.
+     __duckyPluginHost: that object is for main-window scripts and is absent in this
+     sandboxed panel, which is why edits used to fall back to a browser-only copy
+     and never reach the project. If the bridge does not answer we say so — a save
+     is never reported as done when nothing was written. */
+  let _hydrated=false, _hydratedKey=null;
+  let _saveT=null, _saveChain=Promise.resolve(), _lastSaveOk=null;
+  async function _writeStore(){
+    if(!_hydrated || _hydratedKey!==projectKey){ _lastSaveOk={ok:false, error:'design not loaded yet — refusing to overwrite the saved store'}; return _lastSaveOk; }
+    if(!state.meta) state.meta={};
+    state.meta.savedAt=Date.now();
+    // Snapshot at write time so a queued older save cannot overwrite fresher edits.
+    const st=persistableState();
+    try{
+      const r=await rgdRpc('set_store',{state:st},90000);
+      _lastSaveOk=(r&&r.ok)?{ok:true}:{ok:false, error:(r&&(r.error||r.message))||'set_store failed'};
+    }catch(e){ _lastSaveOk={ok:false, error:String(e&&e.message||e)}; }
+    return _lastSaveOk;
+  }
+  function enqueueSave(){
+    const p=_saveChain.then(_writeStore).catch(function(e){
+      _lastSaveOk={ok:false, error:String(e&&e.message||e)};
+      return _lastSaveOk;
+    });
+    _saveChain=p.then(function(){}, function(){});
+    return p;
+  }
+  function save(opts){
+    clearTimeout(_saveT);
+    if(opts&&opts.flush) return enqueueSave();
+    _saveT=setTimeout(function(){ enqueueSave(); }, 250);
+    return Promise.resolve({ok:true, queued:true});
+  }
+  function flushSave(){
+    clearTimeout(_saveT); _saveT=null;
+    return enqueueSave();
+  }
+  function diffNames(){ return (state.difficulties||[]).map(d=>d.name||('D'+d.index)); }
+  function diffLabel(idx){ const d=(state.difficulties||[]).find(x=>x.index===idx); return d?d.name:(['Easy','Normal','Hard'][idx]||('Tier '+idx)); }
+  function npcDiffLine(n){
+    const ds=n.difficultyStats; if(!ds||!ds.length) return '';
+    const e=ds[0], h=ds[ds.length-1];
+    return `<div class="text-[10px] text-gray-500 mt-1">${esc(diffLabel(0))}: ${e.maxHealth} HP · dmg×${e.damageMultiplier} → ${esc(diffLabel(ds.length-1))}: ${h.maxHealth} HP · dmg×${h.damageMultiplier}</div>`;
+  }
+  const uid=(p)=>p+'_'+Math.random().toString(36).slice(2,8);
+
+  /* ================= MCP BRIDGE ================= */
+  const bridge = {
+    resolveHost(){ return window.__duckyPluginHost || window.RGDHost || null; },
+    async raw(name, args){
+      // The postMessage bridge is the only path out of this sandboxed panel; the
+      // main-window host object is just a fallback for other embeddings.
+      try{
+        const r=await rgdRpc('call_tool',{name:name, args:args||{}},60000);
+        if(r&&r.ok) return r.result;
+        if(r&&r.error&&!/unknown tool/i.test(String(r.error))) return { error:r.error };
+      }catch(e){}
+      const h=this.resolveHost(); if(!h) return undefined;
+      try{
+        if (typeof h.callTool==='function')   return await h.callTool(name,args||{});
+        if (typeof h.invokeTool==='function') return await h.invokeTool(name,args||{});
+        if (typeof h.mcp==='function')        return await h.mcp(name,args||{});
+        if (typeof h.request==='function')    return await h.request('tool',{name,args:args||{}});
+      }catch(e){ return { error:String(e&&e.message||e) }; }
+      return undefined;
+    },
+    async call(tool, args){
+      const entry={ t:Date.now(), tool, args:summarize(args), ok:true, result:null };
+      let res;
+      try{
+        const r=await this.raw('rgd_'+tool, args||{});
+        res=(r===undefined)?await sim(tool,args||{}):r;
+        entry.result=res; entry.ok=!(res&&res.error);
+        return res;
+      }catch(e){ entry.ok=false; entry.result={error:String(e)}; return entry.result; }
+      finally{ state.log.unshift(entry); if(state.log.length>200)state.log.length=200;
+        if(state.meta.activeTab==='mcp') renderMCP(); }
+    }
+  };
+  function summarize(a){ if(!a)return''; return Object.entries(a).map(([k,v])=>(v&&typeof v==='object')?k+'={…}':k+'='+String(v)).join(' '); }
+
+  /* ===== LOCAL SIMULATION (standalone fallback) ===== */
+  async function sim(tool,args){
+    await new Promise(r=>setTimeout(r,50));
+    const root='/RoguelikeDesign';
+    switch(tool){
+      case 'get_state': return null;
+      case 'get_sync_status': return computeSyncStatus();
+      case 'get_scene_state': return { actors:state.scene.actors, count:state.scene.actors.length, listener:state.scene.listener };
+      case 'list_levels': return state.levels.map(pick(['id','name','w','h']));
+      case 'list_npcs': return state.npcs.map(pick(['id','name','type']));
+      case 'list_items': return state.items.map(pick(['id','name','category']));
+      case 'list_stats': return state.stats.slice();
+      case 'sync_from_uefn': state.scene.lastSync=Date.now(); state.scene.listener='online'; return { pulled:state.scene.actors.length, present:state.scene.actors.length, actors:state.scene.actors };
+      case 'clear_level_in_uefn': { const b=state.scene.actors.length; state.scene.actors=state.scene.actors.filter(a=>a.levelId!==args.level_id); return { removed:b-state.scene.actors.length }; }
+      case 'spawn_npc_in_uefn':
+      case 'spawn_item_in_uefn': {
+        const isN=tool==='spawn_npc_in_uefn';
+        const ent=(isN?state.npcs:state.items).find(e=>e.id===(args.npc_id||args.item_id)); if(!ent) return {error:'entity not found'};
+        const lvl=state.levels.find(l=>l.id===args.level_id)||{id:'free',name:'Free',w:1,h:1};
+        const dup=state.scene.actors.find(a=>a.levelId===(args.level_id||'free')&&a.x===(args.x||0)&&a.y===(args.y||0)&&a.entityId===ent.id);
+        if(dup) return { skipped:true, reason:'already spawned', actorPath:dup.path };
+        const world=cellToWorld(lvl,args.x||0,args.y||0);
+        const label=safeLabel(ent.name)+'_'+(args.x||0)+'_'+(args.y||0);
+        const folder=folderFor(lvl,isN?'Enemies':'Loot');
+        const actor={ path:root+'/Spawned/'+safeLabel(lvl.name)+'/'+label, label, folder, kind:isN?'npc':'item', entityId:ent.id, levelId:args.level_id||'free', x:args.x||0, y:args.y||0, world, warnings:[] };
+        state.scene.actors.push(actor);
+        return { actorPath:actor.path, label, folder, world, warnings:[] };
+      }
+      case 'build_level_in_uefn': {
+        const lvl=state.levels.find(l=>l.id===args.level_id); if(!lvl) return {error:'level not found'};
+        state.scene.actors=state.scene.actors.filter(a=>a.levelId!==lvl.id);
+        let walls=0,doors=0,ents=0; const warnings=[];
+        for(let y=0;y<lvl.h;y++)for(let x=0;x<lvl.w;x++){ const c=lvl.grid[y][x]; const world=cellToWorld(lvl,x,y);
+          if(c.terrain==='wall'){ state.scene.actors.push(geo(root,lvl,'Wall',x,y,world)); walls++; }
+          else if(c.terrain==='door'){ state.scene.actors.push(geo(root,lvl,'Door',x,y,world)); doors++; }
+          if(c.entity){ const list=c.entity.kind==='npc'?state.npcs:state.items; const e=list.find(z=>z.id===c.entity.id);
+            if(!e){ warnings.push('missing '+c.entity.id); continue; }
+            state.scene.actors.push({ path:root+'/Spawned/'+safeLabel(lvl.name)+'/'+safeLabel(e.name)+'_'+x+'_'+y, label:safeLabel(e.name)+'_'+x+'_'+y, folder:folderFor(lvl,c.entity.kind==='npc'?'Enemies':'Loot'), kind:c.entity.kind, entityId:e.id, levelId:lvl.id, x, y, world }); ents++; }
+        }
+        state.scene.lastSync=Date.now(); state.scene.listener='online';
+        return { level:lvl.name, walls, doors, entities:ents, warnings, actors:state.scene.actors.filter(a=>a.levelId===lvl.id).length };
+      }
+      case 'set_level_overlay': {
+        const lvl=state.levels.find(l=>l.id===args.level_id); if(!lvl) return {error:'level not found'};
+        if(args.clear){ lvl.overlay={file:'',opacity:0.55,enabled:false,stretch:true}; return {ok:true,level_id:lvl.id,overlay:lvl.overlay}; }
+        const ov=Object.assign({file:'',opacity:0.55,enabled:true,stretch:true}, lvl.overlay||{});
+        if(args.opacity!=null) ov.opacity=Math.max(0.05,Math.min(1,+args.opacity));
+        if(args.enabled!=null) ov.enabled=!!args.enabled;
+        if(args.stretch!=null) ov.stretch=!!args.stretch;
+        if(args.image_path) ov.file=String(args.image_path).split(/[/\\]/).pop()||ov.file;
+        lvl.overlay=ov; return {ok:true,level_id:lvl.id,overlay:ov};
+      }
+      default: return { error:'unknown tool '+tool };
+    }
+  }
+  function geo(root,lvl,kind,x,y,world){ return { path:root+'/Spawned/'+safeLabel(lvl.name)+'/'+kind+'_'+x+'_'+y, label:kind+'_'+x+'_'+y, folder:folderFor(lvl,kind==='Wall'?'Geometry/Walls':'Geometry/Doors'), kind:'geo', geo:kind.toLowerCase(), levelId:lvl.id, x, y, world }; }
+  const pick=(keys)=>(o)=>Object.fromEntries(keys.map(k=>[k,o[k]]));
+  function safeLabel(s){ return String(s||'X').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')||'X'; }
+  function folderFor(lvl,sub){ return (lvl&&lvl.name?safeLabel(lvl.name):'Free')+'/'+sub; }
+  function cellToWorld(lvl,x,y){ const w=lvl.w||1,h=lvl.h||1; return { x:(x-w/2)*WORLD_STEP, y:(y-h/2)*WORLD_STEP, z:0 }; }
+
+  /* ===== sync / drift ===== */
+  function intended(){ const out=[]; state.levels.forEach(l=>{ iterPainted(l).forEach(([x,y,c])=>{
+    if(c.terrain==='wall'||c.terrain==='door') out.push(key(l.id,'geo',x,y));
+    if(c.entity) out.push(key(l.id,c.entity.kind,x,y,c.entity.id)); }); }); return out; }
+  const key=(lid,kind,x,y,eid)=>[lid,kind,x,y,eid||''].join('|');
+  function actorKey(a){ return key(a.levelId,a.kind==='geo'?'geo':a.kind,a.x,a.y,a.kind==='geo'?'':a.entityId); }
+  function computeSyncStatus(){ const want=new Set(intended()); const have=new Set(state.scene.actors.map(actorKey));
+    let missing=0,extra=0; want.forEach(k=>{if(!have.has(k))missing++;}); have.forEach(k=>{if(!want.has(k))extra++;});
+    return { inSync:missing===0&&extra===0, missing, extra, sceneActors:state.scene.actors.length, intended:want.size, listener:state.scene.listener, lastSync:state.scene.lastSync }; }
+
+  /* ===== toasts ===== */
+  function toast(msg,kind='info'){
+    const colors={info:'bg-gray-800 border-gray-700',ok:'bg-emerald-900/80 border-emerald-700',warn:'bg-amber-900/80 border-amber-700',err:'bg-red-900/80 border-red-700'};
+    const icons={info:'info',ok:'check-circle-2',warn:'alert-triangle',err:'x-circle'};
+    const el=document.createElement('div');
+    el.className=`toast-in border ${colors[kind]} rounded-lg px-3 py-2.5 text-sm text-gray-100 shadow-lg flex items-start gap-2`;
+    el.innerHTML=`<i data-lucide="${icons[kind]}" class="w-4 h-4 mt-0.5 shrink-0"></i><span>${esc(msg)}</span>`;
+    document.getElementById('toasts').appendChild(el); lucide.createIcons({nodes:[el]});
+    setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); },2600);
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  /* ===== status chips ===== */
+  async function refreshStatus(){
+    const r=await bridge.raw('rgd_get_sync_status',{});
+    let ss;
+    if(r&&!r.error){ ss=r; if(ss.listener) state.scene.listener=ss.listener; }
+    else { state.scene.listener = state.scene.listener==='unknown'?'offline':state.scene.listener; ss=computeSyncStatus(); }
+    const online = state.scene.listener==='online';
+    const setC=(d,t,c,x)=>{ const de=document.getElementById(d),te=document.getElementById(t); if(de)de.className='chip-dot '+c; if(te)te.textContent=x; };
+    const lc=online?'bg-emerald-500':'bg-red-500', lt=online?'online':'offline';
+    setC('chipListenerDot','chipListenerText',lc,'Listener: '+lt); setC('hdrListenerDot','hdrListenerText',lc,'UEFN '+lt);
+    const sc=ss.inSync?'bg-emerald-500':'bg-amber-500', st=ss.inSync?'in sync':`drift (${ss.missing}↑ ${ss.extra}↓)`;
+    setC('chipSyncDot','chipSyncText',sc,'Sync: '+st); setC('hdrSyncDot','hdrSyncText',sc,st);
+    const m=document.getElementById('chipMode');
+    if(m) m.textContent=_hydrated?('saving to: '+projectKey):'READ-ONLY · design store unreachable';
+  }
+
+  /* ===== nav / routing ===== */
+  function buildNav(){ document.getElementById('nav').innerHTML=NAV.map(n=>`
+    <button data-tab="${n.id}" onclick="RGD.go('${n.id}')" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-200 border-l-2 border-transparent transition">
+      <i data-lucide="${n.icon}" class="w-4 h-4"></i><span>${n.label}</span></button>`).join(''); lucide.createIcons(); }
+  function go(tab){
+    state.meta.activeTab=tab;
+    flushSave();
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('is-active'));
+    document.getElementById('tab-'+tab).classList.add('is-active');
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('is-active',b.dataset.tab===tab));
+    const meta=NAV.find(n=>n.id===tab); document.getElementById('pageTitle').textContent=meta.label;
+    const subs={dashboard:'Live design source of truth · shared by UI, MCP tools & skills',levels:'Paint a grid, then build it 1:1 in the live UEFN scene',npcs:'Enemy / Elite / Boss you fight · Friendly (Wizard Bob & friends) you talk to — Melee / Ranged / Caster roles',items:'Scrolls, buffs & currency pickups — stat mods + currency rewards on pickup, optional shop price',currencies:'Gold / Gems / Keys catalogue — referenced by drop rewards, NPC kill loot, and shop prices',weapons:'Weapon catalogue (Pistol / AR / Shotgun / SMG) — open element slots vs locked Time signatures, linked to UEFN custom weapons',wizardry:'Element powers as reusable scrolls (Fire/Ice/Lightning/Void) + locked Time signatures',stats:'Global stats generate NPC/Item fields AND MCP-readable data',difficulties:'Easy / Normal / Hard menu defaults — per-enemy HP, damage, dodge for in-game matching',mcp:'No export. The plugin state IS the product — pushed straight to UEFN'};
+    document.getElementById('pageSub').textContent=subs[tab]||''; renderTab(tab); }
+  function renderTab(tab){ ({dashboard:renderDashboard,levels:renderLevels,npcs:renderNPCs,items:renderItems,currencies:renderCurrencies,weapons:renderWeapons,wizardry:renderWizardry,stats:renderStats,difficulties:renderDifficulties,mcp:renderMCP}[tab]||(()=>{}))(); lucide.createIcons(); }
+
+  /* ===== dashboard ===== */
+  function renderDashboard(){ const ss=computeSyncStatus();
+    const card=(icon,label,val,color)=>`<div class="bg-gray-800 border border-gray-700 rounded-xl p-4"><div class="flex items-center justify-between"><span class="text-xs text-gray-400">${label}</span><i data-lucide="${icon}" class="w-4 h-4 ${color}"></i></div><div class="text-3xl font-bold text-white mt-2">${val}</div></div>`;
+    document.getElementById('tab-dashboard').innerHTML=`
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        ${card('map','Total Levels',state.levels.length,'text-sky-400')}
+        ${card('skull','NPCs Created',state.npcs.length,'text-rose-400')}
+        ${card('gem','Drops Defined',state.items.length,'text-amber-400')}
+        ${card('coins','Currencies',(state.currencies||[]).length,'text-yellow-400')}
+        ${card('crosshair','Player Weapons',(state.weapons||[]).length,'text-cyan-400')}
+        ${card('sparkles','Wizardry Powers',(state.wizardry||[]).length,'text-fuchsia-400')}
+        ${card('sliders-horizontal','Global Stats',state.stats.length,'text-violet-400')}
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <div class="lg:col-span-2 bg-gray-800 border border-gray-700 rounded-xl p-5">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-sm font-semibold text-white flex items-center gap-2"><i data-lucide="plug-zap" class="w-4 h-4 text-indigo-400"></i> UEFN Sync</h3><span class="text-[11px] px-2 py-0.5 rounded-full ${ss.inSync?'bg-emerald-900 text-emerald-300':'bg-amber-900 text-amber-300'}">${ss.inSync?'in sync':'drift'}</span></div>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div><div class="text-2xl font-bold text-white">${state.scene.actors.length}</div><div class="text-[11px] text-gray-400">Actors spawned</div></div>
+            <div><div class="text-2xl font-bold text-white">${ss.intended}</div><div class="text-[11px] text-gray-400">Intended</div></div>
+            <div><div class="text-2xl font-bold ${ss.inSync?'text-emerald-400':'text-amber-400'}">${ss.missing+ss.extra}</div><div class="text-[11px] text-gray-400">Out of sync</div></div>
+          </div>
+          <div class="text-[11px] text-gray-500 mt-4">Listener: <span class="${state.scene.listener==='online'?'text-emerald-400':'text-red-400'}">${state.scene.listener}</span> · Last sync: ${state.scene.lastSync?new Date(state.scene.lastSync).toLocaleTimeString():'never'}</div>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+          <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Quick Actions</h3>
+          <div class="space-y-2">
+            <button onclick="RGD.go('levels');RGD.newLevel()" class="w-full text-left px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Level</button>
+            <button onclick="RGD.go('npcs');RGD.openNPCModal()" class="w-full text-left px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New NPC</button>
+            <button onclick="RGD.pushEverything()" class="w-full text-left px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Push Everything to UEFN</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ===== currencies =====
+     Catalogue of money types. Everywhere else references these ids:
+       drop.currencyReward / npc.currencyDrop = {gold:5}
+       drop.price / weapon.price / wizardry.price = {currencyId, amount} */
+  function ensureCurrencies(){
+    if(!Array.isArray(state.currencies)) state.currencies=[];
+    if(!state.currencies.length){
+      state.currencies=[
+        {id:'gold',name:'Gold',symbol:'G',color:'#fbbf24',desc:'Common loot coin.',startingAmount:0},
+        {id:'gems',name:'Gems',symbol:'◆',color:'#a78bfa',desc:'Rare crystal.',startingAmount:0},
+        {id:'keys',name:'Keys',symbol:'K',color:'#38bdf8',desc:'Unlocks chests and doors.',startingAmount:0},
+      ];
+      return true;
+    }
+    return false;
+  }
+  function currencyById(id){ return (state.currencies||[]).find(c=>c.id===id)||null; }
+  function formatCurrencyBag(bag){
+    bag=bag||{};
+    const parts=Object.keys(bag).filter(k=>Number(bag[k])).map(k=>{
+      const c=currencyById(k); const n=Number(bag[k]);
+      return (c?c.symbol+' ':'')+n+' '+(c?c.name:k);
+    });
+    return parts.join(' · ')||'—';
+  }
+  function formatPrice(price){
+    if(!price||!Number(price.amount)) return '—';
+    const c=currencyById(price.currencyId)||{symbol:'$',name:price.currencyId||'gold'};
+    return (c.symbol||'$')+' '+Number(price.amount)+' '+(c.name||'');
+  }
+  function currencyAmountFields(bag, prefix){
+    ensureCurrencies();
+    bag=bag||{};
+    if(!(state.currencies||[]).length) return '<div class="text-[11px] text-amber-400">Add a currency in the Currencies tab first.</div>';
+    return `<div class="grid grid-cols-3 gap-2">${state.currencies.map(c=>`
+      <label class="block"><span class="text-[10px] text-gray-500">${esc(c.name)}</span>
+        <input id="${prefix}_${esc(c.id)}" type="number" step="1" value="${Number(bag[c.id])||0}" class="${IN}"></label>`).join('')}</div>`;
+  }
+  function collectCurrencyBag(prefix){
+    const out={};
+    (state.currencies||[]).forEach(c=>{
+      const v=Number(val(prefix+'_'+c.id));
+      if(v) out[c.id]=v;
+    });
+    return out;
+  }
+  function priceFieldsHtml(price, prefix){
+    ensureCurrencies();
+    price=price&&typeof price==='object'?price:{currencyId:'gold',amount:0};
+    const opts=(state.currencies||[]).map(c=>`<option value="${esc(c.id)}" ${(price.currencyId||'gold')===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    return `<div class="grid grid-cols-2 gap-3">${field('Shop currency',`<select id="${prefix}Cur" class="${IN}"><option value="">— free —</option>${opts}</select>`)}${field('Shop price',`<input id="${prefix}Amt" type="number" min="0" step="1" value="${Number(price.amount)||0}" class="${IN}">`)}</div>`;
+  }
+  function collectPrice(prefix){
+    const currencyId=val(prefix+'Cur')||'';
+    const amount=Number(val(prefix+'Amt'))||0;
+    if(!currencyId||!amount) return {currencyId:currencyId||'gold', amount:0};
+    return {currencyId, amount};
+  }
+  function renderCurrencies(){
+    ensureCurrencies();
+    const rows=(state.currencies||[]).map(c=>{
+      const usedDrops=(state.items||[]).filter(i=>Number((i.currencyReward||{})[c.id])||((i.price||{}).currencyId===c.id&&Number((i.price||{}).amount))).length;
+      const usedNpcs=(state.npcs||[]).filter(n=>Number((n.currencyDrop||{})[c.id])).length;
+      const usedShop=(state.weapons||[]).filter(w=>((w.price||{}).currencyId===c.id&&Number((w.price||{}).amount))).length
+        +(state.wizardry||[]).filter(p=>((p.price||{}).currencyId===c.id&&Number((p.price||{}).amount))).length
+        +(state.items||[]).filter(i=>((i.price||{}).currencyId===c.id&&Number((i.price||{}).amount))).length;
+      return `<tr class="border-b border-gray-700/60">
+        <td class="py-2 px-3"><span class="inline-flex items-center justify-center w-8 h-8 rounded text-sm font-bold" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}55">${esc(c.symbol||'?')}</span></td>
+        <td class="py-2 px-3"><code class="text-xs text-indigo-300">${esc(c.id)}</code></td>
+        <td class="py-2 px-3 text-sm text-white font-medium">${esc(c.name)}</td>
+        <td class="py-2 px-3 text-sm text-gray-300">${Number(c.startingAmount)||0}</td>
+        <td class="py-2 px-3 text-[11px] text-gray-400">${usedDrops} drops · ${usedNpcs} NPC loot · ${usedShop} prices</td>
+        <td class="py-2 px-3 text-right whitespace-nowrap">
+          <button onclick="RGD.openCurrencyModal('${c.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="RGD.deleteCurrency('${c.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td></tr>`;
+    }).join('')||`<tr><td colspan="6" class="py-8 text-center text-gray-500 text-sm">No currencies yet.</td></tr>`;
+    document.getElementById('tab-currencies').innerHTML=`
+      <div class="flex items-start justify-between mb-4 gap-3 flex-wrap">
+        <p class="text-sm text-gray-400 max-w-2xl">Define money types once. Drops grant them on pickup, enemies drop them on kill, and shops charge them — every amount points at an id from this list.</p>
+        <button onclick="RGD.openCurrencyModal()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2 shrink-0"><i data-lucide="plus" class="w-4 h-4"></i> Add Currency</button>
+      </div>
+      <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto"><table class="w-full min-w-[720px]"><thead><tr class="text-[11px] uppercase tracking-wide text-gray-500 border-b border-gray-700"><th class="text-left py-2 px-3"></th><th class="text-left py-2 px-3">ID</th><th class="text-left py-2 px-3">Name</th><th class="text-left py-2 px-3">Start</th><th class="text-left py-2 px-3">Used by</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function openCurrencyModal(id){
+    ensureCurrencies();
+    const c=state.currencies.find(x=>x.id===id)||{id:'',name:'',symbol:'$',color:'#fbbf24',desc:'',startingAmount:0};
+    modalShell(id?'Edit Currency':'Add Currency',`
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Currency ID',`<input id="mCurId" value="${esc(c.id)}" ${id?'readonly':''} placeholder="gold" class="${IN} ${id?'opacity-60':''}">`)}
+        ${field('Display Name',`<input id="mCurName" value="${esc(c.name)}" placeholder="Gold" class="${IN}">`)}
+        ${field('Symbol',`<input id="mCurSym" maxlength="2" value="${esc(c.symbol||'')}" class="${IN} text-center">`)}
+        ${field('Color',`<input id="mCurColor" type="color" value="${c.color||'#fbbf24'}" class="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg">`)}
+        ${field('Starting amount',`<input id="mCurStart" type="number" min="0" step="1" value="${Number(c.startingAmount)||0}" class="${IN}">`)}
+      </div>
+      ${field('Description',`<textarea id="mCurDesc" rows="2" class="${IN}">${esc(c.desc||'')}</textarea>`)}
+      <p class="text-[11px] text-gray-500 mt-2">Use this id in drop rewards, NPC kill loot, and shop prices across the design.</p>
+    `,`RGD.saveCurrency('${id||''}')`);
+  }
+  function saveCurrency(id){
+    ensureCurrencies();
+    const name=val('mCurName').trim();
+    let cid=id||val('mCurId').trim().toLowerCase().replace(/[^a-z0-9_]/g,'_');
+    if(!cid||!name) return toast('ID and name required','warn');
+    if(!id&&state.currencies.some(c=>c.id===cid)) return toast('Currency id exists','warn');
+    const rec={id:cid, name, symbol:val('mCurSym')||name[0].toUpperCase(), color:val('mCurColor')||'#fbbf24', desc:val('mCurDesc'), startingAmount:Number(val('mCurStart'))||0};
+    if(id){ const i=state.currencies.findIndex(c=>c.id===id); state.currencies[i]=rec; }
+    else state.currencies.push(rec);
+    save({flush:true}); closeModal(); renderCurrencies(); toast('Currency saved','ok');
+  }
+  function deleteCurrency(id){
+    if(!confirm('Delete currency "'+id+'"? It will be cleared from drop rewards, NPC loot, and shop prices.')) return;
+    state.currencies=(state.currencies||[]).filter(c=>c.id!==id);
+    (state.items||[]).forEach(it=>{
+      if(it.currencyReward) delete it.currencyReward[id];
+      if(it.price&&it.price.currencyId===id){ it.price.currencyId='gold'; it.price.amount=0; }
+    });
+    (state.npcs||[]).forEach(n=>{ if(n.currencyDrop) delete n.currencyDrop[id]; });
+    (state.weapons||[]).forEach(w=>{ if(w.price&&w.price.currencyId===id){ w.price.currencyId='gold'; w.price.amount=0; } });
+    (state.wizardry||[]).forEach(p=>{ if(p.price&&p.price.currencyId===id){ p.price.currencyId='gold'; p.price.amount=0; } });
+    save({flush:true}); renderCurrencies(); toast('Currency deleted','ok');
+  }
+
+  /* ===== stats ===== */
+  function renderStats(){ const rows=state.stats.map(s=>`
+    <tr class="border-b border-gray-700/60"><td class="py-2 px-3"><code class="text-xs text-indigo-300">${esc(s.id)}</code></td><td class="py-2 px-3 text-sm">${esc(s.name)}</td><td class="py-2 px-3 text-sm text-gray-300">${s.def}</td>
+    <td class="py-2 px-3 text-right"><button onclick="RGD.openStatModal('${s.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="RGD.deleteStat('${s.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('')
+    ||`<tr><td colspan="4" class="py-8 text-center text-gray-500 text-sm">No stats yet.</td></tr>`;
+    document.getElementById('tab-stats').innerHTML=`
+      <div class="flex items-center justify-between mb-4"><p class="text-sm text-gray-400 max-w-xl">These global stats dynamically generate the input fields in NPC &amp; Item editors — and become readable/writable fields through the plugin's MCP tools.</p>
+      <button onclick="RGD.openStatModal()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2 shrink-0"><i data-lucide="plus" class="w-4 h-4"></i> Add Stat</button></div>
+      <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden"><table class="w-full"><thead><tr class="text-[11px] uppercase tracking-wide text-gray-500 border-b border-gray-700"><th class="text-left py-2 px-3">ID</th><th class="text-left py-2 px-3">Display Name</th><th class="text-left py-2 px-3">Default</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  /* ===== difficulties ===== */
+  function renderDifficulties(){
+    const diffs=(state.difficulties||[]).slice().sort((a,b)=>(a.index||0)-(b.index||0));
+    const menuRows=diffs.map(d=>`
+      <tr class="border-b border-gray-700/60">
+        <td class="py-2 px-3"><code class="text-xs text-indigo-300">${esc(d.id)}</code></td>
+        <td class="py-2 px-3 text-sm font-medium">${esc(d.name)}</td>
+        <td class="py-2 px-3 text-sm text-gray-300">${d.enemyCountPercent}%</td>
+        <td class="py-2 px-3 text-xs text-gray-400">${esc(d.description||'')}</td>
+      </tr>`).join('')||`<tr><td colspan="4" class="py-8 text-center text-gray-500 text-sm">No difficulty tiers defined.</td></tr>`;
+    const npcRows=state.npcs.map(n=>{
+      const ds=n.difficultyStats||[];
+      const cells=diffs.map((d,i)=>{
+        const s=ds[d.index!=null?d.index:i]||ds[i]||{};
+        return `<td class="py-2 px-2 text-[11px] text-gray-300 whitespace-nowrap">${s.maxHealth||'—'} HP · ×${s.damageMultiplier||'?'} · dodge ${s.dodgeChance??'—'}%</td>`;
+      }).join('');
+      return `<tr class="border-b border-gray-800/70"><td class="py-2 px-3 text-sm text-white">${esc(n.name)}</td>${cells}</tr>`;
+    }).join('')||`<tr><td colspan="4" class="py-8 text-center text-gray-500 text-sm">Create NPCs first.</td></tr>`;
+    const head=diffs.map(d=>`<th class="text-left py-2 px-2 text-[11px] text-gray-500">${esc(d.name)}</th>`).join('');
+    document.getElementById('tab-difficulties').innerHTML=`
+      <div class="mb-4"><p class="text-sm text-gray-400 max-w-3xl">Matches <code class="text-indigo-300">roguelike_game_manager</code> Easy/Normal/Hard menu and each NPC device's <code class="text-indigo-300">EasyStats / NormalStats / HardStats</code> block. Use this table to wire identical values in UEFN Details.</p></div>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden xl:col-span-1">
+          <div class="px-4 py-3 border-b border-gray-700 text-sm font-semibold text-white">Menu tiers</div>
+          <table class="w-full"><thead><tr class="text-[11px] uppercase tracking-wide text-gray-500 border-b border-gray-700"><th class="text-left py-2 px-3">ID</th><th class="text-left py-2 px-3">Name</th><th class="text-left py-2 px-3">Wave %</th><th class="text-left py-2 px-3">Notes</th></tr></thead><tbody>${menuRows}</tbody></table>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto xl:col-span-2">
+          <div class="px-4 py-3 border-b border-gray-700 text-sm font-semibold text-white">Per-enemy difficulty stats</div>
+          <table class="w-full min-w-[640px]"><thead><tr class="text-[11px] uppercase tracking-wide text-gray-500 border-b border-gray-700"><th class="text-left py-2 px-3">Enemy</th>${head}</tr></thead><tbody>${npcRows}</tbody></table>
+        </div>
+      </div>`;
+  }
+
+  /* ===== catalogue cards / table view ===== */
+  function catalogueView(){ return (state.meta&&state.meta.catalogueView)==='table'?'table':'cards'; }
+  function setCatalogueView(mode){
+    if(!state.meta) state.meta={};
+    state.meta.catalogueView=(mode==='table')?'table':'cards';
+    save();
+    const tab=state.meta.activeTab;
+    if(tab==='npcs') renderNPCs();
+    else if(tab==='items') renderItems();
+    else if(tab==='weapons') renderWeapons();
+    else if(tab==='wizardry') renderWizardry();
+    lucide.createIcons();
+  }
+  function viewToggleHtml(){
+    const v=catalogueView();
+    return `<div class="view-toggle" title="Cards or table list">
+      <button type="button" class="${v==='cards'?'is-on':''}" onclick="RGD.setCatalogueView('cards')"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Cards</button>
+      <button type="button" class="${v==='table'?'is-on':''}" onclick="RGD.setCatalogueView('table')"><i data-lucide="table" class="w-3.5 h-3.5"></i> Table</button>
+    </div>`;
+  }
+
+  /* ===== drops (scrolls + buffs) =====
+     Drops replaced generic items: every drop is a scroll or a buff, and every one
+     carries a category from this list. Legacy labels (Consumable / Armor / Relic /
+     Currency / Key) are folded in by dropCategory, by name first then by which stat
+     the drop actually modifies. */
+  const DROP_CATEGORIES=['Scroll','Health','Shield','Damage','Speed','Defense','Utility','Currency'];
+  function dropCategory(it){
+    const cat=String((it&&it.category)||'').trim();
+    if(DROP_CATEGORIES.indexOf(cat)>=0) return cat;
+    const name=String((it&&it.name)||'');
+    if((it&&it.currencyReward&&Object.keys(it.currencyReward).some(k=>Number(it.currencyReward[k]))) || /\b(gold|coin|gems?|purse|currency)\b/i.test(name)) return 'Currency';
+    if(/scroll/i.test(cat)||/scroll/i.test(name)) return 'Scroll';
+    if(/shield/i.test(name)) return 'Shield';
+    if(/health|potion|heal|medkit/i.test(name)) return 'Health';
+    const s=(it&&it.stats)||{};
+    if(Number(s.hp)) return 'Health';
+    if(Number(s.speed)) return 'Speed';
+    if(Number(s.attack)) return 'Damage';
+    if(Number(s.defense)) return 'Defense';
+    return 'Utility';
+  }
+  function dropsByCategory(cat){
+    const list=state.items||[];
+    return (!cat||cat==='All')?list.slice():list.filter(i=>dropCategory(i)===cat);
+  }
+  /* Rewrite legacy categories once on load so the store matches what is on screen. */
+  function normalizeDrops(){
+    let changed=false;
+    (state.items||[]).forEach(i=>{
+      const c=dropCategory(i);
+      if(i.category!==c){ i.category=c; changed=true; }
+      if(!i.currencyReward||typeof i.currencyReward!=='object'){ i.currencyReward={}; changed=true; }
+      if(!i.price||typeof i.price!=='object'){ i.price={currencyId:'gold',amount:0}; changed=true; }
+    });
+    return changed;
+  }
+  function setDropFilter(c){ state.meta.dropFilter=c; save(); renderItems(); lucide.createIcons(); }
+
+  /* ===== npcs / items =====
+     NPCs use two axes (same idea as drop categories):
+       type = Enemy | Elite | Boss | Friendly   (threat / affiliation)
+       role = Melee | Ranged | Caster | Charger | Support | Civilian
+     Legacy Merchant/NPC/Ally fold into Friendly. */
+  const NPC_TYPES=['Enemy','Elite','Boss','Friendly'];
+  const NPC_ROLES=['Melee','Ranged','Caster','Charger','Support','Civilian'];
+  function npcType(n){
+    const t=String((n&&n.type)||'').trim();
+    if(NPC_TYPES.indexOf(t)>=0) return t;
+    const low=t.toLowerCase();
+    if(low==='elite') return 'Elite';
+    if(low==='boss') return 'Boss';
+    if(['merchant','npc','ally','friendly','quest','vendor'].indexOf(low)>=0) return 'Friendly';
+    return 'Enemy';
+  }
+  function npcRole(n){
+    const r=String((n&&n.role)||'').trim();
+    if(NPC_ROLES.indexOf(r)>=0) return r;
+    const b=String((n&&n.behavior)||'').toLowerCase();
+    if(/cast|mage|wizard|sorcer/.test(b)) return 'Caster';
+    if(/charge|rush|bomb|splod/.test(b)) return 'Charger';
+    if(/range|archer|kite|lob|sniper|gun/.test(b)) return 'Ranged';
+    if(/heal|buff|support|merchant|shop|vendor/.test(b)) return 'Support';
+    if(/friend|civilian|quest|ally|\bnpc\b/.test(b)) return 'Civilian';
+    const rng=n&&n.stats&&n.stats.range;
+    if(typeof rng==='number' && rng>=1000) return 'Ranged';
+    return npcType(n)==='Friendly'?'Civilian':'Melee';
+  }
+  function npcsFiltered(){
+    const tf=state.meta.npcTypeFilter||'All';
+    const rf=state.meta.npcRoleFilter||'All';
+    return (state.npcs||[]).filter(n=>{
+      if(tf!=='All' && npcType(n)!==tf) return false;
+      if(rf!=='All' && npcRole(n)!==rf) return false;
+      return true;
+    });
+  }
+  function normalizeNpcs(){
+    let changed=false;
+    if(!state.npcs) state.npcs=[];
+    // Starter friendly — same id as backend DEFAULT_NPCS. A tab that loaded before
+    // v1.5 would otherwise keep saving a catalogue without him.
+    if(!state.npcs.some(n=>n&&n.id==='wizard_bob')){
+      state.npcs.push({
+        id:'wizard_bob', name:'Wizard Bob', type:'Friendly', role:'Support',
+        symbol:'W', color:'#38bdf8', behavior:'Friendly Caster',
+        stats:{hp:120,attack:0,defense:8,speed:250,range:0,cooldown:0,chaserange:0,spread:0,sidestep:0},
+        difficultyStats:[]
+      });
+      changed=true;
+    }
+    state.npcs.forEach(n=>{
+      const t=npcType(n), r=npcRole(n);
+      if(n.type!==t){ n.type=t; changed=true; }
+      if(n.role!==r){ n.role=r; changed=true; }
+    });
+    return changed;
+  }
+  function setNpcTypeFilter(c){ state.meta.npcTypeFilter=c; save(); renderNPCs(); lucide.createIcons(); }
+  function setNpcRoleFilter(c){ state.meta.npcRoleFilter=c; save(); renderNPCs(); lucide.createIcons(); }
+  function renderNPCs(){
+    const tf=state.meta.npcTypeFilter||'All';
+    const rf=state.meta.npcRoleFilter||'All';
+    const list=npcsFiltered();
+    const typeChips=['All',...NPC_TYPES].map(c=>{
+      const n=c==='All'?(state.npcs||[]).length:(state.npcs||[]).filter(x=>npcType(x)===c).length;
+      return `<button onclick="RGD.setNpcTypeFilter('${c}')" class="px-2.5 py-1 rounded-lg text-[11px] border ${tf===c?'bg-indigo-600 border-indigo-500 text-white':'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}">${c} <span class="opacity-60">${n}</span></button>`;
+    }).join('');
+    const roleChips=['All',...NPC_ROLES].map(c=>{
+      const n=c==='All'?(state.npcs||[]).length:(state.npcs||[]).filter(x=>npcRole(x)===c).length;
+      return `<button onclick="RGD.setNpcRoleFilter('${c}')" class="px-2.5 py-1 rounded-lg text-[11px] border ${rf===c?'bg-rose-700 border-rose-600 text-white':'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}">${c} <span class="opacity-60">${n}</span></button>`;
+    }).join('');
+    const body=catalogueView()==='table' ? npcTableHtml(list) : npcCardsHtml(list,tf);
+    document.getElementById('tab-npcs').innerHTML=`
+      <div class="flex items-start justify-between mb-4 gap-3 flex-wrap">
+        <div class="max-w-3xl">
+          <p class="text-sm text-gray-400"><span class="text-rose-300">Enemy / Elite / Boss</span> you fight · <span class="text-sky-300">Friendly</span> (Wizard Bob &amp; friends) you talk to. Role is how they fight (or don't).</p>
+          <div class="flex flex-wrap gap-1.5 mt-3">${typeChips}</div>
+          <div class="flex flex-wrap gap-1.5 mt-1.5">${roleChips}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">${viewToggleHtml()}<button onclick="RGD.openNPCModal()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Create NPC</button></div>
+      </div>
+      ${body}`;
+  }
+  function npcCardsHtml(list,typeFilter){
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No NPCs in this filter.</div>`;
+    const grid=items=>`<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">${items.map(n=>entityCard(n,'npc')).join('')}</div>`;
+    if(typeFilter!=='All') return grid(list);
+    return NPC_TYPES.map(c=>{
+      const group=list.filter(n=>npcType(n)===c);
+      if(!group.length) return '';
+      return `<div class="mb-5"><div class="flex items-center gap-2 mb-2"><span class="text-xs font-semibold uppercase tracking-wide text-gray-300">${c}</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-400">${group.length}</span></div>${grid(group)}</div>`;
+    }).join('');
+  }
+  function renderItems(){
+    const filter=state.meta.dropFilter||'All';
+    const list=dropsByCategory(filter);
+    const chips=['All',...DROP_CATEGORIES].map(c=>{
+      const n=c==='All'?(state.items||[]).length:dropsByCategory(c).length;
+      return `<button onclick="RGD.setDropFilter('${c}')" class="px-2.5 py-1 rounded-lg text-[11px] border ${filter===c?'bg-indigo-600 border-indigo-500 text-white':'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}">${c} <span class="opacity-60">${n}</span></button>`;
+    }).join('');
+    const body=catalogueView()==='table' ? itemTableHtml(list) : dropCardsHtml(list,filter);
+    document.getElementById('tab-items').innerHTML=`
+      <div class="flex items-start justify-between mb-4 gap-3 flex-wrap">
+        <div class="max-w-2xl">
+          <p class="text-sm text-gray-400">Drops are <span class="text-amber-300">scrolls</span> and <span class="text-emerald-300">buffs</span> only — no generic items. Stat fields are MODIFIERS (e.g. +10 HP) applied on pickup.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3">${chips}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">${viewToggleHtml()}<button onclick="RGD.openItemModal()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Add Drop</button></div>
+      </div>
+      ${body}`;
+  }
+  /* Cards stay grouped by category so an unfiltered list still reads as categories. */
+  function dropCardsHtml(list,filter){
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No drops in this category.</div>`;
+    const grid=items=>`<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">${items.map(i=>entityCard(i,'item')).join('')}</div>`;
+    if(filter!=='All') return grid(list);
+    return DROP_CATEGORIES.map(c=>{
+      const group=list.filter(i=>dropCategory(i)===c);
+      if(!group.length) return '';
+      return `<div class="mb-5"><div class="flex items-center gap-2 mb-2"><span class="text-xs font-semibold uppercase tracking-wide text-gray-300">${c}</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-400">${group.length}</span></div>${grid(group)}</div>`;
+    }).join('');
+  }
+  function npcTableHtml(list){
+    list=list||state.npcs||[];
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No NPCs in this filter.</div>`;
+    const rows=list.map(n=>{
+      const hp=(n.stats&&n.stats.hp!=null)?n.stats.hp:'—';
+      const atk=(n.stats&&n.stats.attack!=null)?n.stats.attack:'—';
+      return `<tr>
+        <td><span class="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold" style="background:${n.color}22;color:${n.color};border:1px solid ${n.color}55">${esc(n.symbol||'?')}</span></td>
+        <td class="text-white font-medium">${esc(n.name)}</td>
+        <td class="text-gray-300">${esc(npcType(n))}</td>
+        <td class="text-gray-300">${esc(npcRole(n))}</td>
+        <td class="text-gray-400">${esc(n.behavior||'—')}</td>
+        <td class="text-gray-300">${hp}</td>
+        <td class="text-gray-300">${atk}</td>
+        <td class="text-right whitespace-nowrap">
+          <button onclick="RGD.spawnEntity('npc','${n.id}')" class="text-gray-400 hover:text-indigo-300 mr-2" title="Spawn"><i data-lucide="box" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.openNPCModal('${n.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.deleteNPC('${n.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto"><table class="cat-table min-w-[780px]"><thead><tr><th></th><th>Name</th><th>Type</th><th>Role</th><th>Behavior</th><th>HP</th><th>Atk</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function itemTableHtml(list){
+    list=list||state.items||[];
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No drops in this category.</div>`;
+    const rows=list.map(i=>{
+      const mods=state.stats.map(s=>{
+        const v=(i.stats&&i.stats[s.id]!=null)?i.stats[s.id]:0;
+        if(!v) return '';
+        const sign=v>0?'+':'';
+        return `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 ${v>0?'text-emerald-300':v<0?'text-red-300':'text-gray-400'}">${esc(s.id)}${sign}${v}</span>`;
+      }).filter(Boolean).join(' ')||'<span class="text-gray-600">—</span>';
+      return `<tr>
+        <td><span class="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold" style="background:${i.color}22;color:${i.color};border:1px solid ${i.color}55">${esc(i.symbol||'?')}</span></td>
+        <td class="text-white font-medium">${esc(i.name)}</td>
+        <td class="text-gray-300">${esc(dropCategory(i))}</td>
+        <td class="text-gray-400 max-w-[220px] truncate" title="${esc(i.desc||'')}">${esc(i.desc||'—')}</td>
+        <td><div class="flex flex-wrap gap-1">${mods}</div></td>
+        <td class="text-right whitespace-nowrap">
+          <button onclick="RGD.spawnEntity('item','${i.id}')" class="text-gray-400 hover:text-indigo-300 mr-2" title="Spawn"><i data-lucide="box" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.openItemModal('${i.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.deleteItem('${i.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto"><table class="cat-table min-w-[800px]"><thead><tr><th></th><th>Name</th><th>Category</th><th>Description</th><th>Modifiers</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function entityCard(e,kind){
+    const stats=state.stats.map(s=>{ const v=(e.stats&&e.stats[s.id]!=null)?e.stats[s.id]:(kind==='item'?0:s.def); const sign=kind==='item'&&v>0?'+':'';
+      return `<div class="flex justify-between"><span class="text-gray-500">${esc(s.name)}</span><span class="${kind==='item'&&v>0?'text-emerald-400':kind==='item'&&v<0?'text-red-400':'text-gray-300'}">${sign}${v}</span></div>`; }).join('');
+    const money=kind==='npc'?formatCurrencyBag(e.currencyDrop):(formatCurrencyBag(e.currencyReward)+(Number((e.price||{}).amount)?' · buy '+formatPrice(e.price):''));
+    const meta=kind==='npc'?`<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">${esc(npcType(e))}</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-rose-300">${esc(npcRole(e))}</span>`:`<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">${esc(dropCategory(e))}</span>`;
+    const openFn=kind==='npc'?`RGD.openNPCModal('${e.id}')`:`RGD.openItemModal('${e.id}')`;
+    const spawnFn=`RGD.spawnEntity('${kind}','${e.id}')`; const delFn=kind==='npc'?`RGD.deleteNPC('${e.id}')`:`RGD.deleteItem('${e.id}')`;
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col">
+      <div class="flex items-start justify-between"><div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl font-bold" style="background:${e.color}22;color:${e.color};border:1px solid ${e.color}55">${esc(e.symbol||'?')}</div>
+        <div><div class="text-sm font-semibold text-white leading-tight">${esc(e.name)}</div><div class="flex gap-1 mt-1 flex-wrap">${meta}</div></div></div>
+        <div class="flex gap-1"><button onclick="${openFn}" class="text-gray-500 hover:text-white"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button><button onclick="${delFn}" class="text-gray-500 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>
+      ${kind==='item'&&e.desc?`<p class="text-[11px] text-gray-500 mt-2 line-clamp-2">${esc(e.desc)}</p>`:''}
+      ${money&&money!=='—'?`<p class="text-[11px] text-amber-300/90 mt-1">${esc(money)}</p>`:''}
+      ${kind==='npc'?npcDiffLine(e):''}
+      <div class="mt-3 space-y-1 text-[11px] flex-1">${stats||'<span class="text-gray-600">No stats</span>'}</div>
+      <button onclick="${spawnFn}" class="mt-3 w-full px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-indigo-600 text-xs text-gray-200 hover:text-white flex items-center justify-center gap-1.5 transition"><i data-lucide="box" class="w-3.5 h-3.5"></i> Spawn in UEFN</button></div>`;
+  }
+
+  /* ===== levels editor ===== */
+  let paint={ active:false, tool:'floor', entity:null, stroke:false };
+  const undoMap={}; // levelId -> { stack:[grid], redo:[grid] }
+  function activeLevel(){ return state.levels.find(l=>l.id===state.meta.activeLevelId)||null; }
+  function cloneGrid(g){ try{ return JSON.parse(JSON.stringify(g)); }catch(_){ return g; } }
+  function undoBucket(id){
+    if(!undoMap[id]) undoMap[id]={ stack:[], redo:[], max:80 };
+    return undoMap[id];
+  }
+  function pushUndo(lvl){
+    if(!lvl) return;
+    const u=undoBucket(lvl.id);
+    u.stack.push(cloneGrid(lvl.grid));
+    if(u.stack.length>u.max) u.stack.shift();
+    u.redo.length=0;
+    updateUndoButtons();
+  }
+  function undoPaint(){
+    const lvl=activeLevel(); if(!lvl) return;
+    const u=undoBucket(lvl.id); if(!u.stack.length){ toast('Nothing to undo','info'); return; }
+    u.redo.push(cloneGrid(lvl.grid));
+    lvl.grid=u.stack.pop();
+    save({flush:true}); renderGrid(); updateUndoButtons(); refreshStatus(); toast('Undo','ok');
+  }
+  function redoPaint(){
+    const lvl=activeLevel(); if(!lvl) return;
+    const u=undoBucket(lvl.id); if(!u.redo.length){ toast('Nothing to redo','info'); return; }
+    u.stack.push(cloneGrid(lvl.grid));
+    if(u.stack.length>u.max) u.stack.shift();
+    lvl.grid=u.redo.pop();
+    save({flush:true}); renderGrid(); updateUndoButtons(); refreshStatus(); toast('Redo','ok');
+  }
+  function updateUndoButtons(){
+    const lvl=activeLevel(); const u=lvl?undoBucket(lvl.id):null;
+    const ub=document.getElementById('btnUndo'), rb=document.getElementById('btnRedo');
+    if(ub){ ub.disabled=!(u&&u.stack.length); ub.style.opacity=ub.disabled?'0.4':'1'; }
+    if(rb){ rb.disabled=!(u&&u.redo.length); rb.style.opacity=rb.disabled?'0.4':'1'; }
+  }
+  function beginStroke(){
+    if(paint.stroke) return;
+    paint.stroke=true;
+    pushUndo(activeLevel());
+  }
+  function endStroke(){
+    if(!paint.stroke) return;
+    paint.stroke=false; paint.active=false;
+    save({flush:true}); refreshStatus(); updateUndoButtons();
+  }
+  function onEditorKey(ev){
+    const mod=ev.ctrlKey||ev.metaKey; if(!mod) return;
+    const t=ev.target; const tag=(t&&t.tagName)||'';
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
+    const k=ev.key;
+    if(k==='z'||k==='Z'){ ev.preventDefault(); if(ev.shiftKey) redoPaint(); else undoPaint(); }
+    else if(k==='y'||k==='Y'){ ev.preventDefault(); redoPaint(); }
+    else if(k==='s'||k==='S'){
+      ev.preventDefault();
+      Promise.resolve(flushSave()).then(function(r){
+        if(r&&r.ok) toast(r.local?'Saved locally':'Saved','ok');
+        else toast('Save failed: '+((r&&r.error)||'unknown'),'err');
+      }).catch(function(e){ toast('Save failed: '+e,'err'); });
+    }
+  }
+
+  function renderLevels(){ const lvl=activeLevel();
+    const opts=state.levels.map(l=>`<option value="${l.id}" ${l.id===state.meta.activeLevelId?'selected':''}>${esc(l.name)}</option>`).join('');
+    const host=document.getElementById('tab-levels');
+    if(!lvl){ host.innerHTML=`<div class="flex items-center gap-2 mb-4"><select onchange="RGD.selectLevel(this.value)" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm"><option value="">— select a level —</option>${opts}</select><button onclick="RGD.newLevel()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i> New Level</button></div><div class="py-16 text-center text-gray-500 text-sm">No level selected. Create one to open the grid editor.</div>`; return; }
+    const entityTools=[...state.npcs.map(n=>({kind:'npc',...n})),...state.items.map(i=>({kind:'item',...i}))].map(e=>`
+      <button onclick="RGD.pickEntity('${e.kind}','${e.id}')" class="flex items-center gap-2 px-2 py-1.5 rounded-lg border text-xs ${paint.entity===e.kind+':'+e.id?'border-indigo-500 bg-indigo-600/20':'border-gray-700 bg-gray-800 hover:bg-gray-700'}"><span class="w-5 h-5 rounded flex items-center justify-center font-bold" style="background:${e.color}22;color:${e.color}">${esc(e.symbol||'?')}</span><span class="truncate max-w-[80px]">${esc(e.name)}</span></button>`).join('')||`<span class="text-xs text-gray-600">Create NPCs / Items first.</span>`;
+    const terrBtn=(t,label,glyph)=>`<button onclick="RGD.pickTool('${t}')" class="px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 ${paint.tool===t&&!paint.entity?'border-indigo-500 bg-indigo-600/20':'border-gray-700 bg-gray-800 hover:bg-gray-700'}"><span class="font-mono text-gray-400">${glyph}</span> ${label}</button>`;
+    host.innerHTML=`
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <select onchange="RGD.selectLevel(this.value)" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">${opts}</select>
+        <button onclick="RGD.newLevel()" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i></button>
+        <button onclick="RGD.saveLevel()" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm flex items-center gap-1.5"><i data-lucide="save" class="w-4 h-4"></i> Save Level</button>
+        <button onclick="RGD.deleteLevel('${lvl.id}')" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-red-600 text-sm flex items-center gap-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        <div class="flex-1"></div>
+        <button onclick="RGD.buildLevel('${lvl.id}')" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium flex items-center gap-1.5"><i data-lucide="hammer" class="w-4 h-4"></i> Build This Level in UEFN</button>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <div class="xl:col-span-1 space-y-4">
+          <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 space-y-3">
+            <div><label class="text-[11px] text-gray-400">Level Name</label><input value="${esc(lvl.name)}" onchange="RGD.updateLevelField('name',this.value)" class="w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm"></div>
+            <div class="flex gap-2">
+              <div class="flex-1"><label class="text-[11px] text-gray-400">Theme</label><input type="color" value="${lvl.theme||'#6366f1'}" onchange="RGD.updateLevelField('theme',this.value)" class="w-full h-8 mt-1 bg-gray-900 border border-gray-700 rounded-lg"></div>
+              <div class="flex-1"><label class="text-[11px] text-gray-400">Threat</label><select onchange="RGD.updateLevelField('threat',this.value)" class="w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm">${['Low','Medium','High','Boss'].map(t=>`<option ${lvl.threat===t?'selected':''}>${t}</option>`).join('')}</select></div>
+            </div>
+            <div class="flex gap-2 items-end">
+              <div class="flex-1"><label class="text-[11px] text-gray-400">Width</label><input id="lvlW" type="number" min="4" max="100000" value="${lvl.w}" class="w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm"></div>
+              <div class="flex-1"><label class="text-[11px] text-gray-400">Height</label><input id="lvlH" type="number" min="4" max="100000" value="${lvl.h}" class="w-full mt-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm"></div>
+            </div>
+            <div class="flex gap-2"><button onclick="RGD.resizeLevel()" class="flex-1 px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs">Resize</button><button onclick="RGD.resetLevel()" class="flex-1 px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-red-600 text-xs">Reset Grid</button></div>
+          </div>
+
+          <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 space-y-3">
+            <div class="text-[11px] uppercase tracking-wide text-gray-500">Map Overlay</div>
+            <div class="text-[11px] text-gray-400">Stretch a reference image under the grid and build on top of it.</div>
+            <label class="flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" id="ovEnabled" ${((lvl.overlay||{}).enabled)?'checked':''} onchange="RGD.setOverlayField('enabled',this.checked)"> Show overlay</label>
+            <label class="flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" id="ovStretch" ${((lvl.overlay||{}).stretch!==false)?'checked':''} onchange="RGD.setOverlayField('stretch',this.checked)"> Stretch to grid</label>
+            <div><label class="text-[11px] text-gray-400">Opacity <span id="ovOpacityLabel">${Math.round((((lvl.overlay||{}).opacity)||0.55)*100)}%</span></label>
+              <input id="ovOpacity" type="range" min="5" max="100" value="${Math.round((((lvl.overlay||{}).opacity)||0.55)*100)}" oninput="RGD.setOverlayOpacity(this.value)" class="w-full mt-1"></div>
+            <input id="ovFile" type="file" accept="image/*" class="hidden" onchange="RGD.onOverlayFile(this)">
+            <div class="flex gap-2">
+              <button onclick="document.getElementById('ovFile').click()" class="flex-1 px-2 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs">Load Image</button>
+              <button onclick="RGD.clearOverlay()" class="flex-1 px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-red-600 text-xs">Clear</button>
+            </div>
+            <div class="text-[10px] text-gray-600 truncate" title="${esc(((lvl.overlay||{}).source_name)||((lvl.overlay||{}).file)||'')}">${esc(((lvl.overlay||{}).source_name)||((lvl.overlay||{}).file)||'No image yet')}</div>
+          </div>
+
+          <div class="bg-gray-800 border border-gray-700 rounded-xl p-4">
+            <div class="text-[11px] uppercase tracking-wide text-gray-500 mb-2">Terrain</div>
+            <div class="flex flex-wrap gap-2">${terrBtn('floor','Floor','·')}${terrBtn('wall','Wall','#')}${terrBtn('door','Door','+')}${terrBtn('erase','Erase','×')}</div>
+            <div class="text-[11px] uppercase tracking-wide text-gray-500 mt-4 mb-2">Entities</div>
+            <div class="flex flex-wrap gap-2">${entityTools}</div>
+            <button onclick="RGD.pickTool('erase-entity')" class="mt-2 w-full px-2 py-1.5 rounded-lg border text-xs ${paint.tool==='erase-entity'?'border-red-500 bg-red-600/20':'border-gray-700 bg-gray-800 hover:bg-gray-700'}">Erase Entity</button>
+          </div>
+        </div>
+        <div class="xl:col-span-3 bg-gray-800 border border-gray-700 rounded-xl p-4">
+          <div class="grid-toolbar">
+            <span class="grid-hint">Click-drag paint · Ctrl+Z / Ctrl+Y undo · Ctrl+S save · Scroll pan · Ctrl+Scroll zoom · ${WORLD_STEP} uu/cell · ${lvl.w}×${lvl.h}${isSparseGrid(lvl.grid)?' · sparse':''}</span>
+            <div class="flex-1"></div>
+            <button type="button" id="btnUndo" onclick="RGD.undoPaint()" title="Undo (Ctrl+Z)">Undo</button>
+            <button type="button" id="btnRedo" onclick="RGD.redoPaint()" title="Redo (Ctrl+Y)">Redo</button>
+            <button type="button" onclick="RGD.zoomBy(1.25)">Zoom +</button>
+            <button type="button" onclick="RGD.zoomBy(0.8)">Zoom −</button>
+            <button type="button" onclick="RGD.fitGrid()">Fit</button>
+            <button type="button" onclick="RGD.centerGrid()">Center</button>
+            <span id="zoomLabel" class="grid-hint">${Math.round(view.zoom*100)}%</span>
+          </div>
+          <div id="gridViewport" class="grid-viewport"><div id="gridWrap" class="grid-world"></div></div>
+        </div>
+      </div>`;
+    renderGrid(); updateUndoButtons();
+  }
+  // Survives tab remounts within the same panel session (and is refilled from disk).
+  let _overlayCache={ id:null, file:'', dataUrl:'' };
+  const _overlayDiskCache={}; // `${levelId}::${file}` -> dataUrl
+  async function ensureOverlayData(lvl){
+    const ov=lvl.overlay||{};
+    if(!ov.enabled||!(ov.file||ov._dataUrl)){ return ''; }
+    const diskKey=lvl.id+'::'+(ov.file||'');
+    if(ov._dataUrl){
+      _overlayCache={id:lvl.id,file:ov.file||'',dataUrl:ov._dataUrl};
+      if(ov.file) _overlayDiskCache[diskKey]=ov._dataUrl;
+      return ov._dataUrl;
+    }
+    if(_overlayCache.id===lvl.id && _overlayCache.file===ov.file && _overlayCache.dataUrl) return _overlayCache.dataUrl;
+    if(ov.file && _overlayDiskCache[diskKey]){
+      _overlayCache={id:lvl.id,file:ov.file,dataUrl:_overlayDiskCache[diskKey]};
+      return _overlayDiskCache[diskKey];
+    }
+    let dataUrl='';
+    try{
+      if(typeof rgdRpc==='function'){
+        // Backend returns a downscaled JPEG preview — full maps are multi‑MB and break the panel bridge.
+        const r=await rgdRpc('get_overlay_image',{level_id:lvl.id, max_edge:1600},45000);
+        if(r&&r.ok&&r.dataUrl) dataUrl=r.dataUrl;
+        else if(r&&r.dataUrl) dataUrl=r.dataUrl;
+        else if(r&&r.error) console.warn('[RGD] get_overlay_image', r.error, r.missing_file||'');
+      }
+    }catch(e){ console.warn('[RGD] get_overlay_image failed', e); }
+    if(!dataUrl && ov.file){
+      dataUrl='../assets/overlays/'+ov.file;
+    }
+    if(dataUrl && ov.file) _overlayDiskCache[diskKey]=dataUrl;
+    _overlayCache={id:lvl.id,file:ov.file||'',dataUrl};
+    return dataUrl;
+  }
+  function applyOverlayToImg(lvl){
+    ensureOverlayData(lvl).then(url=>{
+      const img=document.getElementById('mapOverlayImg');
+      if(img&&url) img.src=url;
+    });
+  }
+  function applyViewTransform(){
+    const wrap=document.getElementById('gridWrap'); if(!wrap)return;
+    wrap.style.transform=`translate(${view.panX}px,${view.panY}px) scale(${view.zoom})`;
+    const zl=document.getElementById('zoomLabel'); if(zl) zl.textContent=Math.round(view.zoom*100)+'%';
+  }
+  function stageSize(lvl, cell){
+    const gap=2;
+    return { gw: lvl.w*cell+(lvl.w-1)*gap, gh: lvl.h*cell+(lvl.h-1)*gap, gap, cell };
+  }
+  function fitGrid(){
+    const lvl=activeLevel(); const vp=document.getElementById('gridViewport'); if(!lvl||!vp)return;
+    const {gw,gh}=stageSize(lvl, view.baseCell);
+    const pad=24; const zx=(vp.clientWidth-pad)/Math.max(1,gw); const zy=(vp.clientHeight-pad)/Math.max(1,gh);
+    view.zoom=clamp(Math.min(zx,zy),0.02,8); view.fitted=true;
+    view.panX=(vp.clientWidth-gw*view.zoom)/2; view.panY=(vp.clientHeight-gh*view.zoom)/2;
+    applyViewTransform();
+  }
+  function centerGrid(){
+    const lvl=activeLevel(); const vp=document.getElementById('gridViewport'); if(!lvl||!vp)return;
+    const {gw,gh}=stageSize(lvl, view.baseCell);
+    view.panX=(vp.clientWidth-gw*view.zoom)/2; view.panY=(vp.clientHeight-gh*view.zoom)/2;
+    applyViewTransform();
+  }
+  function zoomBy(factor, cx, cy){
+    const vp=document.getElementById('gridViewport'); if(!vp)return;
+    const rect=vp.getBoundingClientRect();
+    const mx=(cx!=null?cx:rect.left+rect.width/2)-rect.left;
+    const my=(cy!=null?cy:rect.top+rect.height/2)-rect.top;
+    const prev=view.zoom; const next=clamp(prev*factor,0.02,8);
+    if(next===prev) return;
+    // keep point under cursor stable
+    view.panX = mx - (mx - view.panX) * (next/prev);
+    view.panY = my - (my - view.panY) * (next/prev);
+    view.zoom=next; applyViewTransform();
+  }
+  function bindGridNav(vp){
+    if(!vp || vp.dataset.navBound==='1') return;
+    vp.dataset.navBound='1';
+    let space=false; let panning=false; let lastX=0,lastY=0;
+    window.addEventListener('keydown',e=>{ if(e.code==='Space') space=true; });
+    window.addEventListener('keyup',e=>{ if(e.code==='Space') space=false; });
+    vp.addEventListener('wheel', (ev)=>{
+      ev.preventDefault();
+      if(ev.ctrlKey || ev.metaKey){
+        const f = ev.deltaY<0 ? 1.12 : 0.9;
+        zoomBy(f, ev.clientX, ev.clientY);
+      } else if(ev.shiftKey){
+        view.panX -= ev.deltaY;
+        applyViewTransform();
+      } else {
+        // scroll moves camera up/down (and trackpads can provide deltaX)
+        view.panY -= ev.deltaY;
+        view.panX -= ev.deltaX;
+        applyViewTransform();
+      }
+    }, {passive:false});
+    vp.addEventListener('mousedown', (ev)=>{
+      if(ev.button===1 || space || (ev.button===0 && ev.altKey)){
+        panning=true; vp.classList.add('is-panning'); lastX=ev.clientX; lastY=ev.clientY; ev.preventDefault();
+      }
+    });
+    window.addEventListener('mousemove', (ev)=>{
+      if(!panning) return;
+      view.panX += ev.clientX-lastX; view.panY += ev.clientY-lastY;
+      lastX=ev.clientX; lastY=ev.clientY; applyViewTransform();
+    });
+    window.addEventListener('mouseup', ()=>{ panning=false; vp.classList.remove('is-panning'); });
+  }
+  function renderGrid(){ const lvl=activeLevel(); if(!lvl)return;
+    const wrap=document.getElementById('gridWrap'); const vp=document.getElementById('gridViewport');
+    if(!wrap||!vp)return;
+    bindGridNav(vp);
+    const cell=view.baseCell; const {gw,gh,gap}=stageSize(lvl, cell);
+    const ov=lvl.overlay||{}; const show=!!(ov.enabled&&ov.file);
+    const fit=ov.stretch===false?'contain':'fill';
+    const op=Math.max(0.05,Math.min(1, +(ov.opacity||0.55)));
+    const sparse=isSparseGrid(lvl.grid);
+    const tooBig = (lvl.w*lvl.h) > 12000; // avoid millions of DOM nodes
+    let html=`<div class="grid-stage${show?' has-overlay':''}" style="width:${gw}px;height:${gh}px">`;
+    if(show){ html+=`<img class="map-overlay" id="mapOverlayImg" alt="map overlay" style="opacity:${op};object-fit:${fit}">`; }
+    if(tooBig || sparse){
+      // Canvas path for large / sparse island maps.
+      // Keep canvas transparent so the <img.map-overlay> underneath stays visible.
+      html+=`<canvas id="gridCanvas" width="${gw}" height="${gh}" style="position:relative;z-index:1;image-rendering:pixelated;cursor:crosshair;background:transparent"></canvas>`;
+      html+='</div>'; wrap.innerHTML=html;
+      const canvas=document.getElementById('gridCanvas'); const ctx=canvas.getContext('2d');
+      ctx.clearRect(0,0,gw,gh);
+      if(!show){ ctx.fillStyle='#0b0f19'; ctx.fillRect(0,0,gw,gh); }
+      const step=cell+gap;
+      if(lvl.w<=400 && lvl.h<=400){
+        ctx.strokeStyle=show?'rgba(31,41,55,0.55)':'#1f2937'; ctx.lineWidth=1;
+        for(let x=0;x<=lvl.w;x++){ ctx.beginPath(); ctx.moveTo(x*step,0); ctx.lineTo(x*step,gh); ctx.stroke(); }
+        for(let y=0;y<=lvl.h;y++){ ctx.beginPath(); ctx.moveTo(0,y*step); ctx.lineTo(gw,y*step); ctx.stroke(); }
+      }
+      iterPainted(lvl).forEach(([x,y,c])=>{
+        let bg='#1e293b';
+        if(c.terrain==='wall') bg='#374151';
+        else if(c.terrain==='door') bg='#78350f';
+        else if(c.terrain==='floor') bg=show?'rgba(30,41,59,0.55)':'#1e293b';
+        else return;
+        ctx.fillStyle=bg; ctx.fillRect(x*step,y*step,cell,cell);
+        if(c.terrain==='wall'||c.terrain==='door'){
+          ctx.fillStyle=c.terrain==='door'?'#fbbf24':'#9ca3af';
+          ctx.font=`${Math.max(10,Math.floor(cell*0.55))}px monospace`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(c.terrain==='door'?'+':'#', x*step+cell/2, y*step+cell/2);
+        }
+        if(c.entity){
+          const list=c.entity.kind==='npc'?state.npcs:state.items;
+          const e=list.find(z=>z.id===c.entity.id);
+          if(e){ ctx.fillStyle=e.color||'#fff'; ctx.font=`bold ${Math.max(10,Math.floor(cell*0.55))}px monospace`;
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(e.symbol||'?', x*step+cell/2, y*step+cell/2); }
+        }
+      });
+      const paintAt=(ev)=>{
+        const rect=canvas.getBoundingClientRect();
+        const sx=(ev.clientX-rect.left)*(canvas.width/Math.max(1,rect.width));
+        const sy=(ev.clientY-rect.top)*(canvas.height/Math.max(1,rect.height));
+        const x=Math.floor(sx/step), y=Math.floor(sy/step);
+        if(x<0||y<0||x>=lvl.w||y>=lvl.h) return;
+        applyCell(x,y,false);
+        // local redraw one cell
+        const c=getCell(lvl,x,y);
+        ctx.clearRect(x*step,y*step,cell,cell);
+        if(!show){ ctx.fillStyle='#0b0f19'; ctx.fillRect(x*step,y*step,cell,cell); }
+        if(c.terrain==='floor'){ ctx.fillStyle=show?'rgba(30,41,59,0.55)':'#1e293b'; ctx.fillRect(x*step,y*step,cell,cell); }
+        if(c.terrain==='wall'){ ctx.fillStyle='#374151'; ctx.fillRect(x*step,y*step,cell,cell); ctx.fillStyle='#9ca3af'; ctx.font=`${Math.max(10,Math.floor(cell*0.55))}px monospace`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('#', x*step+cell/2, y*step+cell/2); }
+        if(c.terrain==='door'){ ctx.fillStyle='#78350f'; ctx.fillRect(x*step,y*step,cell,cell); ctx.fillStyle='#fbbf24'; ctx.font=`${Math.max(10,Math.floor(cell*0.55))}px monospace`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('+', x*step+cell/2, y*step+cell/2); }
+        if(c.entity){ const list=c.entity.kind==='npc'?state.npcs:state.items; const e=list.find(z=>z.id===c.entity.id); if(e){ ctx.fillStyle=e.color||'#fff'; ctx.font=`bold ${Math.max(10,Math.floor(cell*0.55))}px monospace`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(e.symbol||'?', x*step+cell/2, y*step+cell/2);} }
+      };
+      canvas.onmousedown=(ev)=>{ if(ev.button!==0||ev.altKey) return; beginStroke(); paint.active=true; paintAt(ev); };
+      canvas.onmousemove=(ev)=>{ if(!paint.active) return; paintAt(ev); };
+      document.onmouseup=()=>{ if(paint.active||paint.stroke) endStroke(); else paint.active=false; };
+    } else {
+      html+=`<div style="display:grid;grid-template-columns:repeat(${lvl.w},${cell}px);gap:${gap}px;position:relative;z-index:1">`;
+      for(let y=0;y<lvl.h;y++)for(let x=0;x<lvl.w;x++){ const c=getCell(lvl,x,y); let bg='#0b0f19',bd='#1f2937',glyph='',gcol='#9ca3af';
+        if(c.terrain==='floor'){bg='#1e293b';} if(c.terrain==='wall'){bg='#374151';bd='#4b5563';glyph='#';} if(c.terrain==='door'){bg='#78350f';bd='#b45309';glyph='+';gcol='#fbbf24';}
+        let entMark=''; if(c.entity){ const list=c.entity.kind==='npc'?state.npcs:state.items; const e=list.find(z=>z.id===c.entity.id); if(e){ entMark=`<span style="color:${e.color};font-weight:700">${esc(e.symbol||'?')}</span>`; } }
+        html+=`<div class="grid-cell" data-x="${x}" data-y="${y}" data-terrain="${c.terrain||'empty'}" style="width:${cell}px;height:${cell}px;background:${bg};border:1px solid ${bd};display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:14px;color:${gcol};cursor:pointer">${entMark||glyph}</div>`; }
+      html+='</div></div>'; wrap.innerHTML=html;
+      const paintDom=(cellEl)=>{
+        const x=+cellEl.dataset.x, y=+cellEl.dataset.y;
+        applyCell(x,y,false);
+        const c=getCell(lvl,x,y); let bg='#0b0f19',bd='#1f2937',glyph='',gcol='#9ca3af';
+        if(c.terrain==='floor'){bg='#1e293b';} if(c.terrain==='wall'){bg='#374151';bd='#4b5563';glyph='#';} if(c.terrain==='door'){bg='#78350f';bd='#b45309';glyph='+';gcol='#fbbf24';}
+        let entMark=''; if(c.entity){ const list=c.entity.kind==='npc'?state.npcs:state.items; const e=list.find(z=>z.id===c.entity.id); if(e){ entMark=`<span style="color:${e.color};font-weight:700">${esc(e.symbol||'?')}</span>`; } }
+        cellEl.dataset.terrain=c.terrain||'empty';
+        cellEl.style.background=bg; cellEl.style.borderColor=bd; cellEl.style.color=gcol;
+        cellEl.innerHTML=entMark||glyph;
+      };
+      wrap.onmousedown=(ev)=>{ if(ev.button!==0||ev.altKey) return; const c=ev.target.closest('.grid-cell'); if(!c)return; beginStroke(); paint.active=true; paintDom(c); };
+      wrap.onmouseover=(ev)=>{ if(!paint.active)return; const c=ev.target.closest('.grid-cell'); if(!c)return; paintDom(c); };
+      document.onmouseup=()=>{ if(paint.active||paint.stroke) endStroke(); else paint.active=false; };
+    }
+    if(show){ applyOverlayToImg(lvl); }
+    if(!view.fitted){ fitGrid(); } else { applyViewTransform(); }
+    updateUndoButtons();
+  }
+  function applyCell(x,y,rerender=true){ const lvl=activeLevel(); if(!lvl)return; const c=getCell(lvl,x,y);
+    if(paint.tool==='erase-entity'){ c.entity=null; }
+    else if(paint.entity){ if(c.terrain==='empty'||c.terrain==='wall'||c.terrain==='door')c.terrain='floor'; const [kind,id]=paint.entity.split(':'); c.entity={kind,id}; }
+    else if(paint.tool==='erase'){ c.terrain='empty'; c.entity=null; }
+    else { c.terrain=paint.tool; }
+    setCell(lvl,x,y,c);
+    // The store write is debounced (and flushed by endStroke) — one write per stroke, not per cell.
+    save();
+    if(rerender){ renderGrid(); lucide.createIcons(); }
+  }
+
+  /* ===== MCP / Live Sync ===== */
+  function renderMCP(){ const ss=computeSyncStatus(); const planned=intended();
+    const sceneList=state.scene.actors.slice(0,60).map(a=>`<div class="flex items-center justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-300 truncate max-w-[220px]">${esc(a.label)}</span><span class="text-gray-500 truncate max-w-[160px]">${esc(a.folder)}</span></div>`).join('')||`<div class="text-[11px] text-gray-600 py-2">Scene empty.</div>`;
+    const stateSummary=`<div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">Levels</span><span class="text-gray-200">${state.levels.length}</span></div><div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">NPCs</span><span class="text-gray-200">${state.npcs.length}</span></div><div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">Items</span><span class="text-gray-200">${state.items.length}</span></div><div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">Player Weapons</span><span class="text-gray-200">${(state.weapons||[]).length}</span></div><div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">Stats</span><span class="text-gray-200">${state.stats.length}</span></div><div class="flex justify-between text-[11px] py-1 border-b border-gray-800/70"><span class="text-gray-400">Intended placements</span><span class="text-gray-200">${planned.length}</span></div>`;
+    const logRows=state.log.slice(0,40).map(l=>`<div class="flex items-start gap-2 text-[11px] py-1 border-b border-gray-800/60"><span class="chip-dot mt-1 ${l.ok?'bg-emerald-500':'bg-red-500'}"></span><span class="font-mono text-indigo-300 shrink-0">rgd_${esc(l.tool)}</span><span class="text-gray-500 truncate">${esc(l.args||'')}</span><span class="ml-auto text-gray-600 shrink-0">${new Date(l.t).toLocaleTimeString()}</span></div>`).join('')||`<div class="text-[11px] text-gray-600 py-2">No MCP calls yet.</div>`;
+    document.getElementById('tab-mcp').innerHTML=`
+      <div class="flex items-center gap-3 mb-4 flex-wrap">
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-xs"><span class="chip-dot ${state.scene.listener==='online'?'bg-emerald-500':'bg-red-500'}"></span>Listener ${state.scene.listener}</div>
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg ${ss.inSync?'bg-emerald-900/50 border-emerald-700':'bg-amber-900/50 border-amber-700'} border text-xs"><i data-lucide="${ss.inSync?'check':'alert-triangle'}" class="w-3.5 h-3.5"></i>${ss.inSync?'In sync':`Drift — ${ss.missing} missing in scene, ${ss.extra} extra`}</div>
+        <div class="flex-1"></div>
+        <button onclick="RGD.syncFromUEFN()" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm flex items-center gap-1.5"><i data-lucide="download-cloud" class="w-4 h-4"></i> Sync From UEFN</button>
+        <button onclick="RGD.pushEverything()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-1.5"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Push To UEFN</button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-4"><h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4 text-violet-400"></i> Plugin Design State</h3>${stateSummary}</div>
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-4"><h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i data-lucide="box" class="w-4 h-4 text-sky-400"></i> Live UEFN Scene (${state.scene.actors.length})</h3><div class="max-h-64 overflow-y-auto">${sceneList}</div></div>
+      </div>
+      <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 mt-4"><h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i> MCP Tool Call Log</h3><div class="max-h-72 overflow-y-auto font-mono">${logRows}</div></div>`;
+    lucide.createIcons();
+  }
+
+
+
+  /* ===== player weapons (categories + power slots) ===== */
+  const WEAPON_CLASS_TRAITS = {
+    Pistol:{name:'Sidearm',summary:'Flexible sidearms. Open slots take element infusions; locked slots are Time signatures.'},
+    'Assault Rifle':{name:'Suppression',summary:'Eight continuous hits on the same target makes it flinch and cut its damage output. ARs keep a target locked down while the party sets up reactions.'},
+    Shotgun:{name:'Saturation',summary:'Every pellet applies element stacks individually. A full body hit up close procs a status instantly. Shotguns are the fastest status applier and start reactions for everyone else.'},
+    SMG:{name:'Haste',summary:'Sustained fire builds Haste stacks that raise movement and reload speed. SMGs are the only class that fires at full accuracy while sprinting or dashing.'},
+  };
+  const OPEN_SLOT=[{id:"slot_element",index:1,kind:"open",accepts:["element_infusion","charged"],rerollPolicy:"hub",equippedPowerId:null,label:"Element Infusion"}];
+  const lockedSlot=(id,label)=>[{id:"slot_signature",index:1,kind:"locked",accepts:[],rerollPolicy:"none",lockedPowerId:id,equippedPowerId:id,label}];
+  const WEAPON_DEFAULTS = [
+    {id:"service_pistol",name:"Service Pistol",symbol:"S",color:"#f59e0b",category:"Pistol",starter:true,slotPolicy:"infusable",
+      desc:"Starter semi-auto. Tapping beats spamming — free crits reward patience.",
+      fireIdentity:"Semi auto. Any shot fired after a 0.4s pause is a guaranteed crit.",
+      suggestedElements:["Ice"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Service",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_ServicePistol",icon:"assets/weapons/pistol.svg",verseClass:"weapon_service_pistol",upgrades:[]},
+    {id:"hand_cannon",name:"Hand Cannon",symbol:"H",color:"#ef4444",category:"Pistol",slotPolicy:"infusable",
+      desc:"Six shots, heavy damage, real knockback. Overpressure pierce after every reload.",
+      fireIdentity:"Every reload chambers one Overpressure round that pierces through a target and keeps going.",
+      suggestedElements:["Void"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_HandCannon",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_HandCannon",icon:"assets/weapons/pistol.svg",verseClass:"weapon_hand_cannon",upgrades:[]},
+    {id:"machine_pistol",name:"Machine Pistol",symbol:"M",color:"#22c55e",category:"Pistol",slotPolicy:"infusable",
+      desc:"Full auto on a heat gauge. Hold longer for more damage, pay with wider accuracy.",
+      fireIdentity:"Full auto on a heat gauge. Accuracy widens as heat climbs but damage climbs with it.",
+      suggestedElements:["Fire","Lightning"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Machine",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_MachinePistol",icon:"assets/weapons/pistol.svg",verseClass:"weapon_machine_pistol",upgrades:[]},
+    {id:"paradox",name:"Paradox",symbol:"P",color:"#94a3b8",category:"Pistol",slotPolicy:"locked_power",
+      desc:"Time signature. Every shot echoes 1.5s later at the same point in space.",
+      fireIdentity:"Every shot fires twice — once now, and an echo 1.5 seconds later at the exact same point in space.",
+      suggestedElements:[],powerSlots:lockedSlot("stasis_field","Stasis Field"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Arc",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Paradox",icon:"assets/weapons/pistol.svg",verseClass:"weapon_paradox",upgrades:[]},
+    {id:"hourglass",name:"Hourglass",symbol:"G",color:"#64748b",category:"Pistol",slotPolicy:"locked_power",
+      desc:"Time signature. Accelerates aging; kills chamber a round instantly.",
+      fireIdentity:"Damage scales with missing health. Kills chamber a round instantly, no reload.",
+      suggestedElements:[],powerSlots:lockedSlot("rewind","Rewind"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Reaper",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Hourglass",icon:"assets/weapons/pistol.svg",verseClass:"weapon_hourglass",upgrades:[]},
+    {id:"vanguard",name:"Vanguard",symbol:"V",color:"#f97316",category:"Assault Rifle",slotPolicy:"infusable",
+      desc:"Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output.",
+      fireIdentity:"Full auto that tightens instead of widening. After one second of held fire, spread drops to zero and damage ramps.",
+      suggestedElements:["Fire"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Vanguard",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Vanguard",icon:"assets/weapons/assault_rifle.svg",verseClass:"weapon_vanguard",upgrades:[]},
+    {id:"tribeam",name:"Tribeam",symbol:"T",color:"#38bdf8",category:"Assault Rifle",slotPolicy:"infusable",
+      desc:"Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output.",
+      fireIdentity:"Three round burst. All three landing refunds the ammo and applies double element stacks.",
+      suggestedElements:["Ice","Void"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Tribeam",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Tribeam",icon:"assets/weapons/assault_rifle.svg",verseClass:"weapon_tribeam",upgrades:[]},
+    {id:"longshot",name:"Longshot",symbol:"L",color:"#facc15",category:"Assault Rifle",slotPolicy:"infusable",
+      desc:"Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output.",
+      fireIdentity:"Semi auto marksman. Damage scales upward with distance to target.",
+      suggestedElements:["Lightning"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Longshot",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Longshot",icon:"assets/weapons/assault_rifle.svg",verseClass:"weapon_longshot",upgrades:[]},
+    {id:"recursion",name:"Recursion",symbol:"R",color:"#94a3b8",category:"Assault Rifle",slotPolicy:"locked_power",
+      desc:"Time signature AR. Suppression still applies while Loop replays your fire.",
+      fireIdentity:"Every sixth shot instantly replays the previous five shots at once.",
+      suggestedElements:[],powerSlots:lockedSlot("loop","Loop"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Recursion",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Recursion",icon:"assets/weapons/assault_rifle.svg",verseClass:"weapon_recursion",upgrades:[]},
+    {id:"prophecy",name:"Prophecy",symbol:"Y",color:"#cbd5e1",category:"Assault Rifle",slotPolicy:"locked_power",
+      desc:"Time signature AR. Suppression still applies — never miss a moving enemy.",
+      fireIdentity:"Shots resolve half a second ahead, so they land where the target will be. Never misses a moving enemy.",
+      suggestedElements:[],powerSlots:lockedSlot("precognition","Precognition"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Prophecy",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Prophecy",icon:"assets/weapons/assault_rifle.svg",verseClass:"weapon_prophecy",upgrades:[]},
+    {id:"breacher",name:"Breacher",symbol:"B",color:"#a855f7",category:"Shotgun",slotPolicy:"infusable",
+      desc:"Class trait Saturation: every pellet applies element stacks individually.",
+      fireIdentity:"Pump action, tight cone, heavy stagger. Loads shell by shell so you can cancel the reload at any point.",
+      suggestedElements:["Void"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Breacher",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Breacher",icon:"assets/weapons/shotgun.svg",verseClass:"weapon_breacher",upgrades:[]},
+    {id:"flechette",name:"Flechette",symbol:"F",color:"#ef4444",category:"Shotgun",slotPolicy:"infusable",
+      desc:"Class trait Saturation: every pellet applies element stacks individually.",
+      fireIdentity:"Very wide cone, very high pellet count. Useless past ten meters, instant max stacks inside it.",
+      suggestedElements:["Fire","Ice"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Flechette",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Flechette",icon:"assets/weapons/shotgun.svg",verseClass:"weapon_flechette",upgrades:[]},
+    {id:"ripper",name:"Ripper",symbol:"I",color:"#facc15",category:"Shotgun",slotPolicy:"infusable",
+      desc:"Class trait Saturation: every pellet applies element stacks individually.",
+      fireIdentity:"Semi auto, fewer pellets per shot. Consecutive hits tighten the cone toward a slug.",
+      suggestedElements:["Lightning"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Ripper",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Ripper",icon:"assets/weapons/shotgun.svg",verseClass:"weapon_ripper",upgrades:[]},
+    {id:"echo",name:"Echo",symbol:"E",color:"#94a3b8",category:"Shotgun",slotPolicy:"locked_power",
+      desc:"Time signature shotgun. Saturation still applies while Aftershock records damage.",
+      fireIdentity:"One trigger pull, three blasts. The shot repeats twice more at the same point in space, half a second apart.",
+      suggestedElements:[],powerSlots:lockedSlot("aftershock","Aftershock"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Echo",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Echo",icon:"assets/weapons/shotgun.svg",verseClass:"weapon_echo",upgrades:[]},
+    {id:"unmake",name:"Unmake",symbol:"U",color:"#64748b",category:"Shotgun",slotPolicy:"locked_power",
+      desc:"Time signature shotgun. Saturation still applies while Regression reverts elites.",
+      fireIdentity:"Each pellet strips one layer of armor, shield, or buff from what it hits.",
+      suggestedElements:[],powerSlots:lockedSlot("regression","Regression"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Unmake",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Unmake",icon:"assets/weapons/shotgun.svg",verseClass:"weapon_unmake",upgrades:[]},
+    {id:"shred",name:"Shred",symbol:"S",color:"#ef4444",category:"SMG",slotPolicy:"infusable",
+      desc:"Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed.",
+      fireIdentity:"Consecutive hits on the same target stack a damage bonus. Miss and the stacks decay.",
+      suggestedElements:["Fire"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Shred",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Shred",icon:"assets/weapons/smg.svg",verseClass:"weapon_shred",upgrades:[]},
+    {id:"splitfire",name:"Splitfire",symbol:"P",color:"#facc15",category:"SMG",slotPolicy:"infusable",
+      desc:"Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed.",
+      fireIdentity:"Two streams that converge at a fixed distance. Standing at the convergence point doubles your damage.",
+      suggestedElements:["Lightning"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Splitfire",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Splitfire",icon:"assets/weapons/smg.svg",verseClass:"weapon_splitfire",upgrades:[]},
+    {id:"flux",name:"Flux",symbol:"X",color:"#38bdf8",category:"SMG",slotPolicy:"infusable",
+      desc:"Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed.",
+      fireIdentity:"Damage climbs as the magazine empties. The last quarter of the mag hits hardest.",
+      suggestedElements:["Ice","Void"],powerSlots:OPEN_SLOT.map(s=>({...s})),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Flux",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Flux",icon:"assets/weapons/smg.svg",verseClass:"weapon_flux",upgrades:[]},
+    {id:"tempo",name:"Tempo",symbol:"T",color:"#e2e8f0",category:"SMG",slotPolicy:"locked_power",
+      desc:"Time signature SMG. Haste still applies while Accelerate doubles your tempo.",
+      fireIdentity:"Fire rate climbs the longer you hold the trigger with no cap. Release and it resets to base.",
+      suggestedElements:[],powerSlots:lockedSlot("accelerate","Accelerate"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Tempo",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Tempo",icon:"assets/weapons/smg.svg",verseClass:"weapon_tempo",upgrades:[]},
+    {id:"revenant",name:"Revenant",symbol:"V",color:"#475569",category:"SMG",slotPolicy:"locked_power",
+      desc:"Time signature SMG. Haste still applies while Second Self mirrors your fire.",
+      fireIdentity:"Every tenth kill leaves an afterimage of you that fires one burst at the nearest enemy.",
+      suggestedElements:[],powerSlots:lockedSlot("second_self","Second Self"),
+      uefnAsset:"/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Revenant",uefnIcon:"/Roguelike/Weapons/Icons/T_Icon_Revenant",icon:"assets/weapons/smg.svg",verseClass:"weapon_revenant",upgrades:[]},
+  ];
+  const OLD_STUB_WEAPON_IDS = new Set(["pistol","assault_rifle","smg","shotgun","bolt_sniper","auto_sniper","rocket_launcher","bow","crossbow","minigun"]);
+
+  function ensureWeapons(){
+    if(!state.weapons) state.weapons=[];
+    if(!state.meta) state.meta={};
+    state.meta.weaponClassTraits = state.meta.weaponClassTraits || {};
+    Object.entries(WEAPON_CLASS_TRAITS).forEach(([cat,trait])=>{
+      if(!state.meta.weaponClassTraits[cat]) state.meta.weaponClassTraits[cat]=JSON.parse(JSON.stringify(trait));
+    });
+    const ids=new Set(state.weapons.map(w=>w.id));
+    const onlyStubs=[...ids].length>0 && [...ids].every(id=>OLD_STUB_WEAPON_IDS.has(id));
+    if((state.version||0)<4 || onlyStubs || !state.weapons.length){
+      state.weapons=JSON.parse(JSON.stringify(WEAPON_DEFAULTS));
+      state.version=Math.max(state.version||0,4);
+    } else {
+      WEAPON_DEFAULTS.forEach(w=>{ if(!ids.has(w.id) && !OLD_STUB_WEAPON_IDS.has(w.id)) state.weapons.push(JSON.parse(JSON.stringify(w))); });
+      state.weapons=state.weapons.filter(w=>!OLD_STUB_WEAPON_IDS.has(w.id));
+    }
+  }
+
+  function powerName(id){
+    if(!id) return '— empty —';
+    const p=(state.wizardry||[]).find(x=>x.id===id);
+    return p?p.name:id;
+  }
+
+  function renderWeapons(){
+    ensureWeapons(); ensureWizardry();
+    const order=['Pistol','Assault Rifle','Shotgun','SMG'];
+    const cats=[...new Set(state.weapons.map(w=>w.category||'Pistol'))].sort((a,b)=>{
+      const ia=order.indexOf(a), ib=order.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib) || a.localeCompare(b);
+    });
+    const filter=state.meta.weaponFilter||'All';
+    const list=state.weapons.filter(w=>filter==='All'||(w.category||'Pistol')===filter);
+    const chips=['All',...cats].map(c=>`<button onclick="RGD.setWeaponFilter('${c}')" class="px-2.5 py-1 rounded-lg text-[11px] border ${filter===c?'bg-indigo-600 border-indigo-500 text-white':'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}">${c}</button>`).join('');
+    const trait=(filter!=='All'&&(state.meta.weaponClassTraits||WEAPON_CLASS_TRAITS)[filter])||null;
+    const traitHtml=trait?`<div class="mt-3 rounded-lg border border-cyan-900/50 bg-cyan-950/30 px-3 py-2"><div class="text-[11px] font-semibold text-cyan-300">Class trait · ${esc(trait.name)}</div><p class="text-[11px] text-gray-400 mt-0.5">${esc(trait.summary)}</p></div>`:`<p class="text-sm text-gray-400">Four classes. <span class="text-amber-300">Open</span> slots take element infusion scrolls (reroll at hub). <span class="text-slate-300">Locked</span> slots are Time signatures that cannot be swapped.</p>`;
+    const body=catalogueView()==='table'
+      ? weaponTableHtml(list)
+      : `<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">${list.map(weaponCard).join('')||`<div class="col-span-full py-12 text-center text-gray-500 text-sm">No weapons in this category.</div>`}</div>`;
+    document.getElementById('tab-weapons').innerHTML=`
+      <div class="flex items-start justify-between mb-4 gap-3 flex-wrap">
+        <div class="max-w-2xl">
+          ${traitHtml}
+          <div class="flex flex-wrap gap-1.5 mt-3">${chips}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">${viewToggleHtml()}<button onclick="RGD.openWeaponModal()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Add Weapon</button></div>
+      </div>
+      ${body}`;
+  }
+  function weaponTableHtml(list){
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No weapons in this category.</div>`;
+    const rows=list.map(w=>{
+      const slots=(w.powerSlots||[]).map(s=>{
+        const locked=s.kind==='locked';
+        const eq=locked?(s.lockedPowerId||s.equippedPowerId):s.equippedPowerId;
+        return `${locked?'🔒':'◇'} ${esc(powerName(eq))}`;
+      }).join(' · ')||'—';
+      const sug=(w.suggestedElements||[]).join(', ')||'—';
+      const iconHtml=w.icon?`<img src="../${esc(w.icon)}" alt="" class="w-7 h-7 rounded object-cover border border-gray-700">`:`<span class="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold" style="background:${w.color}22;color:${w.color};border:1px solid ${w.color}55">${esc(w.symbol||'?')}</span>`;
+      return `<tr>
+        <td>${iconHtml}</td>
+        <td class="text-white font-medium">${esc(w.name)}${w.starter?' <span class="text-[10px] text-amber-400">starter</span>':''}</td>
+        <td class="text-gray-300">${esc(w.category||'Pistol')}</td>
+        <td><span class="text-[10px] px-1.5 py-0.5 rounded ${w.slotPolicy==='locked_power'?'bg-slate-700 text-slate-200':'bg-amber-900/40 text-amber-200'}">${w.slotPolicy==='locked_power'?'Locked':'Infusable'}</span></td>
+        <td class="text-gray-400 max-w-[200px] truncate" title="${esc(w.fireIdentity||'')}">${esc(w.fireIdentity||'—')}</td>
+        <td class="text-gray-400">${esc(sug)}</td>
+        <td class="text-gray-300 text-[11px]">${slots}</td>
+        <td class="mono max-w-[140px] truncate" title="${esc(w.verseClass||'')}">${esc(w.verseClass||'—')}</td>
+        <td class="text-right whitespace-nowrap">
+          <button onclick="RGD.openWeaponModal('${w.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.deleteWeapon('${w.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto"><table class="cat-table min-w-[980px]"><thead><tr><th></th><th>Name</th><th>Class</th><th>Slots</th><th>Fire identity</th><th>Suits</th><th>Power</th><th>Verse</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function setWeaponFilter(c){ state.meta.weaponFilter=c; save(); renderWeapons(); lucide.createIcons(); }
+
+  function weaponCard(w){
+    const slots=(w.powerSlots||[]).map(s=>{
+      const locked=s.kind==='locked';
+      const eq=locked?(s.lockedPowerId||s.equippedPowerId):s.equippedPowerId;
+      return `<div class="flex items-center justify-between text-[11px] py-1.5 border-b border-gray-800/60 last:border-0 gap-2">
+        <span class="px-1.5 py-0.5 rounded ${locked?'bg-slate-700 text-slate-200':'bg-amber-900/50 text-amber-200'}">${locked?'Locked':'Open'}</span>
+        <span class="text-gray-300 truncate flex-1">${esc(s.label||'Slot')}</span>
+        <span class="text-indigo-300 truncate max-w-[40%] text-right">${esc(powerName(eq))}</span>
+      </div>`;
+    }).join('')||'<div class="text-[11px] text-gray-600">No power slots</div>';
+    const sug=(w.suggestedElements||[]).map(e=>`<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">${esc(e)}</span>`).join('');
+    const iconHtml=w.icon?`<img src="../${esc(w.icon)}" alt="" class="w-11 h-11 rounded-lg object-cover border border-gray-700">`:`<div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl font-bold" style="background:${w.color}22;color:${w.color};border:1px solid ${w.color}55">${esc(w.symbol||'?')}</div>`;
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          ${iconHtml}
+          <div class="min-w-0"><div class="text-sm font-semibold text-white leading-tight truncate">${esc(w.name)}${w.starter?' <span class="text-[10px] text-amber-400">starter</span>':''}</div>
+            <div class="flex gap-1 mt-1 flex-wrap">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">${esc(w.category||'Pistol')}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded ${w.slotPolicy==='locked_power'?'bg-slate-700 text-slate-200':'bg-amber-900/40 text-amber-200'}">${w.slotPolicy==='locked_power'?'Locked power':'Infusable'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-1 shrink-0"><button onclick="RGD.openWeaponModal('${w.id}')" class="text-gray-500 hover:text-white"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button><button onclick="RGD.deleteWeapon('${w.id}')" class="text-gray-500 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>
+      </div>
+      ${w.fireIdentity?`<p class="text-[11px] text-cyan-300/80 mt-2 line-clamp-2">${esc(w.fireIdentity)}</p>`:''}
+      ${w.desc?`<p class="text-[11px] text-gray-500 mt-1 line-clamp-2">${esc(w.desc)}</p>`:''}
+      ${sug?`<div class="flex gap-1 mt-2 flex-wrap"><span class="text-[10px] text-gray-600">Suits:</span>${sug}</div>`:''}
+      <div class="mt-3 text-[10px] text-gray-500 break-all"><span class="text-gray-600">UEFN:</span> <code class="text-indigo-300">${esc(w.uefnAsset||'—')}</code></div>
+      <div class="mt-1 text-[10px] text-gray-500 break-all"><span class="text-gray-600">Verse:</span> <code class="text-emerald-300">${esc(w.verseClass||'—')}</code></div>
+      <div class="mt-3 flex-1"><div class="text-[10px] text-gray-500 mb-1">Power slots</div>${slots}</div>
+    </div>`;
+  }
+
+  function openWeaponModal(id){
+    ensureWeapons(); ensureWizardry();
+    const w=state.weapons.find(x=>x.id===id)||{name:'',category:'Pistol',symbol:'W',color:'#3b82f6',desc:'',fireIdentity:'',slotPolicy:'infusable',suggestedElements:[],powerSlots:[{kind:'open',label:'Element Infusion',rerollPolicy:'hub'}],uefnAsset:'',uefnIcon:'',icon:'',verseClass:'',upgrades:[]};
+    const policy=w.slotPolicy||'infusable';
+    const lockedId=(w.powerSlots&&w.powerSlots[0]&&(w.powerSlots[0].lockedPowerId||w.powerSlots[0].equippedPowerId))||'';
+    const powerOpts=(state.wizardry||[]).filter(p=>p.kind==='locked_signature'||p.element==='Time').map(p=>`<option value="${esc(p.id)}" ${lockedId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+    const sug=Array.isArray(w.suggestedElements)?w.suggestedElements.join(', '):'';
+    modalShell(id?'Edit Player Weapon':'Add Player Weapon',`
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Name',`<input id="mName" value="${esc(w.name||'')}" class="${IN}">`)}
+        ${field('Category',`<select id="mCat" class="${IN}">${['Pistol','Assault Rifle','Shotgun','SMG','Sniper','Explosive','Bow','Heavy','Other'].map(t=>`<option ${(w.category||'Pistol')===t?'selected':''}>${t}</option>`).join('')}</select>`)}
+        ${field('Symbol',`<input id="mSymbol" maxlength="1" value="${esc(w.symbol||'')}" class="${IN} text-center">`)}
+        ${field('Color',`<input id="mColor" type="color" value="${w.color||'#3b82f6'}" class="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg">`)}
+      </div>
+      ${field('Fire identity',`<textarea id="mFire" rows="2" class="${IN}">${esc(w.fireIdentity||'')}</textarea>`)}
+      ${field('Description',`<textarea id="mDesc" rows="2" class="${IN}">${esc(w.desc||'')}</textarea>`)}
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Slot policy',`<select id="mPolicy" class="${IN}" onchange="document.getElementById('mLockedWrap').style.display=this.value==='locked_power'?'block':'none'"><option value="infusable" ${policy==='infusable'?'selected':''}>Infusable (open element slot)</option><option value="locked_power" ${policy==='locked_power'?'selected':''}>Locked signature power</option></select>`)}
+        ${field('Suggested elements',`<input id="mSug" value="${esc(sug)}" placeholder="Ice, Fire" class="${IN}">`)}
+      </div>
+      <div id="mLockedWrap" style="display:${policy==='locked_power'?'block':'none'}">${field('Locked power',`<select id="mLocked" class="${IN}"><option value="">—</option>${powerOpts}</select>`)}</div>
+      ${field('UEFN Custom Weapon Path',`<input id="mAsset" value="${esc(w.uefnAsset||'')}" placeholder="/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_…" class="${IN} font-mono text-xs">`)}
+      ${field('UEFN Icon Texture Path',`<input id="mIconAsset" value="${esc(w.uefnIcon||'')}" placeholder="/Roguelike/Weapons/Icons/T_Icon_…" class="${IN} font-mono text-xs">`)}
+      ${field('Panel Icon (plugin SVG)',`<input id="mIcon" value="${esc(w.icon||'')}" placeholder="assets/weapons/pistol.svg" class="${IN} font-mono text-xs">`)}
+      ${field('Verse class',`<input id="mVerse" value="${esc(w.verseClass||'')}" placeholder="weapon_service_pistol" class="${IN} font-mono text-xs">`)}
+      <div class="mt-3"><div class="text-[11px] text-gray-400 mb-2">Shop price (0 = not sold / starter)</div>${priceFieldsHtml(w.price,'mWPrice')}</div>
+      <p class="text-[11px] text-gray-500">Open slots reroll at the hub between runs. Locked Time powers never accept element infusions.</p>
+    `,`RGD.saveWeapon('${id||''}')`);
+  }
+
+  function saveWeapon(id){
+    const name=val('mName').trim(); if(!name)return toast('Name required','warn');
+    const policy=val('mPolicy')||'infusable';
+    const sug=val('mSug').split(',').map(s=>s.trim()).filter(Boolean);
+    let powerSlots;
+    if(policy==='locked_power'){
+      const pid=val('mLocked');
+      const pname=powerName(pid);
+      powerSlots=[{id:'slot_signature',index:1,kind:'locked',accepts:[],rerollPolicy:'none',lockedPowerId:pid,equippedPowerId:pid,label:pname==='— empty —'?'Signature':pname}];
+    } else {
+      const prev=(id&&state.weapons.find(x=>x.id===id)||{}).powerSlots||[];
+      const eq=(prev[0]&&prev[0].kind==='open')?prev[0].equippedPowerId:null;
+      powerSlots=[{id:'slot_element',index:1,kind:'open',accepts:['element_infusion','charged'],rerollPolicy:'hub',equippedPowerId:eq,label:'Element Infusion'}];
+    }
+    const rec={
+      id:id||uid('weapon'), name, category:val('mCat')||'Pistol', symbol:val('mSymbol')||name[0].toUpperCase(),
+      color:val('mColor'), desc:val('mDesc'), fireIdentity:val('mFire'),
+      slotPolicy:policy, powerSlots, suggestedElements:sug,
+      starter:!!(id&&(state.weapons.find(x=>x.id===id)||{}).starter),
+      uefnAsset:val('mAsset').trim(), uefnIcon:val('mIconAsset').trim(),
+      icon:val('mIcon').trim()||('assets/weapons/'+(id||name.toLowerCase().replace(/[^a-z0-9]+/g,'_'))+'.svg'),
+      verseClass:val('mVerse').trim()||('weapon_'+(id||name.toLowerCase().replace(/[^a-z0-9]+/g,'_'))),
+      price:collectPrice('mWPrice'),
+      upgrades:[]
+    };
+    if(id){ const i=state.weapons.findIndex(x=>x.id===id); state.weapons[i]=rec; }
+    else state.weapons.push(rec);
+    save({flush:true}); closeModal(); renderWeapons(); toast('Weapon saved','ok');
+  }
+  function deleteWeapon(id){ state.weapons=(state.weapons||[]).filter(w=>w.id!==id); save({flush:true}); renderWeapons(); toast('Weapon deleted','ok'); }
+
+  /* ===== wizardry (element powers / scrolls) ===== */
+  const WIZARDRY_DEFAULTS = [
+    {id:"burn_infusion",name:"Burn Infusion",element:"Fire",kind:"element_infusion",color:"#ef4444",symbol:"F",stackName:"Burn",stackThreshold:5,procName:"Ignite",procDesc:"DoT that spreads to nearby enemies.",desc:"On hit, apply Burn. At 5 stacks: Ignite.",findable:true,buyable:true,reusable:true,customItemId:"scroll_burn_infusion",verseClass:"wizardry_burn_infusion"},
+    {id:"cinder_nova",name:"Cinder Nova",element:"Fire",kind:"charged",color:"#f97316",symbol:"N",chargedName:"Cinder Nova",chargedDesc:"Ignites everything around you; doubles burn ticks for 6s.",desc:"Charged ability: Cinder Nova.",findable:true,buyable:true,reusable:true,customItemId:"scroll_cinder_nova",verseClass:"wizardry_cinder_nova"},
+    {id:"chill_infusion",name:"Chill Infusion",element:"Ice",kind:"element_infusion",color:"#38bdf8",symbol:"I",stackName:"Chill",stackThreshold:5,procName:"Frozen",procDesc:"Locked in place; 2x crit until break.",desc:"On hit, apply Chill. At 5 stacks: Frozen.",findable:true,buyable:true,reusable:true,customItemId:"scroll_chill_infusion",verseClass:"wizardry_chill_infusion"},
+    {id:"frost_field",name:"Frost Field",element:"Ice",kind:"charged",color:"#0ea5e9",symbol:"Z",chargedName:"Frost Field",chargedDesc:"Zone that chills everything inside continuously.",desc:"Charged ability: Frost Field.",findable:true,buyable:true,reusable:true,customItemId:"scroll_frost_field",verseClass:"wizardry_frost_field"},
+    {id:"charge_infusion",name:"Charge Infusion",element:"Lightning",kind:"element_infusion",color:"#facc15",symbol:"L",stackName:"Charge",stackThreshold:5,procName:"Overload",procDesc:"Bursts and jumps to 3 nearby enemies.",desc:"On hit, apply Charge. At 5 stacks: Overload.",findable:true,buyable:true,reusable:true,customItemId:"scroll_charge_infusion",verseClass:"wizardry_charge_infusion"},
+    {id:"storm_call",name:"Storm Call",element:"Lightning",kind:"charged",color:"#eab308",symbol:"K",chargedName:"Storm Call",chargedDesc:"Strikes the 6 highest charge targets on screen.",desc:"Charged ability: Storm Call.",findable:true,buyable:true,reusable:true,customItemId:"scroll_storm_call",verseClass:"wizardry_storm_call"},
+    {id:"decay_infusion",name:"Decay Infusion",element:"Void",kind:"element_infusion",color:"#a855f7",symbol:"V",stackName:"Decay",stackThreshold:5,procName:"Collapse",procDesc:"Pulls nearby enemies; cuts their damage.",desc:"On hit, apply Decay. At 5 stacks: Collapse.",findable:true,buyable:true,reusable:true,customItemId:"scroll_decay_infusion",verseClass:"wizardry_decay_infusion"},
+    {id:"singularity",name:"Singularity",element:"Void",kind:"charged",color:"#7c3aed",symbol:"Q",chargedName:"Singularity",chargedDesc:"Rift that pulls, holds, and drains.",desc:"Charged ability: Singularity.",findable:true,buyable:true,reusable:true,customItemId:"scroll_singularity",verseClass:"wizardry_singularity"},
+    {id:"stasis_field",name:"Stasis Field",element:"Time",kind:"locked_signature",color:"#94a3b8",symbol:"T",chargedName:"Stasis Field",chargedDesc:"Time stops; stored damage lands when field drops.",desc:"Locked to Paradox. Time stop zone; damage stored then released.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_stasis_field"},
+    {id:"rewind",name:"Rewind",element:"Time",kind:"locked_signature",color:"#64748b",symbol:"R",chargedName:"Rewind",chargedDesc:"Health, ammo, position snap back 5 seconds.",desc:"Locked to Hourglass. Rewind self 5 seconds.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_rewind"},
+    {id:"loop",name:"Loop",element:"Time",kind:"locked_signature",color:"#94a3b8",symbol:"L",chargedName:"Loop",chargedDesc:"Records four seconds of fire, then replays it on its own.",desc:"Locked to Recursion. Records four seconds of your fire, then replays it while you do something else.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_loop"},
+    {id:"precognition",name:"Precognition",element:"Time",kind:"locked_signature",color:"#cbd5e1",symbol:"P",chargedName:"Precognition",chargedDesc:"For six seconds nothing you can see can hit you.",desc:"Locked to Prophecy. For six seconds nothing you can see can hit you.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_precognition"},
+    {id:"aftershock",name:"Aftershock",element:"Time",kind:"locked_signature",color:"#94a3b8",symbol:"A",chargedName:"Aftershock",chargedDesc:"Records five seconds of damage, replays at the same spots three seconds later.",desc:"Locked to Echo. For five seconds everything you deal is recorded, then replays at the same spots three seconds later.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_aftershock"},
+    {id:"regression",name:"Regression",element:"Time",kind:"locked_signature",color:"#64748b",symbol:"G",chargedName:"Regression",chargedDesc:"Reverts enemies in front, stripping shields/armor/elite mods.",desc:"Locked to Unmake. Reverts every enemy in front of you to an earlier state, removing shields, armor, and elite modifiers.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_regression"},
+    {id:"accelerate",name:"Accelerate",element:"Time",kind:"locked_signature",color:"#e2e8f0",symbol:"C",chargedName:"Accelerate",chargedDesc:"Move, shoot, and reload at double speed while the world runs normal.",desc:"Locked to Tempo. You move, shoot, and reload at double speed while the world runs normal.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_accelerate"},
+    {id:"second_self",name:"Second Self",element:"Time",kind:"locked_signature",color:"#475569",symbol:"2",chargedName:"Second Self",chargedDesc:"Time clone mirrors everything you fire for eight seconds.",desc:"Locked to Revenant. A time clone appears and mirrors everything you fire for eight seconds.",findable:false,buyable:false,reusable:false,customItemId:"",verseClass:"wizardry_second_self"},
+  ];
+  const ELEMENT_ORDER = ["Fire","Ice","Lightning","Void","Time"];
+
+  function ensureWizardry(){
+    if(!state.wizardry) state.wizardry=[];
+    if(!state.elements) state.elements=[];
+    if(!state.meta) state.meta={};
+    state.meta.infusionRerollPolicy = state.meta.infusionRerollPolicy || 'hub';
+    const seen=new Set(state.wizardry.map(p=>p.id));
+    if(!state.wizardry.length || (state.version||0)<4){
+      state.wizardry=JSON.parse(JSON.stringify(WIZARDRY_DEFAULTS));
+    } else {
+      WIZARDRY_DEFAULTS.forEach(p=>{ if(!seen.has(p.id)) state.wizardry.push(JSON.parse(JSON.stringify(p))); });
+    }
+    // Ensure scroll items exist for findable powers
+    if(!state.items) state.items=[];
+    const itemIds=new Set(state.items.map(i=>i.id));
+    state.wizardry.filter(p=>p.findable && p.customItemId).forEach(p=>{
+      if(!itemIds.has(p.customItemId)){
+        const zeros={}; (state.stats||[]).forEach(s=>zeros[s.id]=0);
+        state.items.push({id:p.customItemId,name:'Scroll: '+p.name,category:'Wizardry Scroll',symbol:p.symbol,color:p.color,
+          desc:'Reusable scroll. Slot onto any open weapon power slot. '+(p.desc||''),
+          stats:zeros,wizardryId:p.id,element:p.element,reusable:true,uefnCustomItem:'',verseClass:p.verseClass});
+      }
+    });
+  }
+
+  function renderWizardry(){
+    ensureWizardry();
+    const filter=state.meta.wizardryFilter||'All';
+    const chips=['All',...ELEMENT_ORDER].map(c=>`<button onclick="RGD.setWizardryFilter('${c}')" class="px-2.5 py-1 rounded-lg text-[11px] border ${filter===c?'bg-violet-600 border-violet-500 text-white':'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}">${c}</button>`).join('');
+    const list=state.wizardry.filter(p=>filter==='All'||p.element===filter);
+    let body;
+    if(catalogueView()==='table'){
+      body=wizardryTableHtml(list);
+    } else {
+      body=ELEMENT_ORDER.filter(e=>filter==='All'||filter===e).map(el=>{
+        const powers=state.wizardry.filter(p=>p.element===el);
+        if(!powers.length) return '';
+        const cards=powers.map(wizardryCard).join('');
+        return `<div class="mb-6"><h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${powers[0].color}"></span>${el}</h3><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">${cards}</div></div>`;
+      }).join('')||'<div class="py-12 text-center text-gray-500 text-sm">No wizardry powers.</div>';
+    }
+    document.getElementById('tab-wizardry').innerHTML=`
+      <div class="flex items-start justify-between mb-4 gap-3 flex-wrap">
+        <div class="max-w-2xl">
+          <p class="text-sm text-gray-400">Remnant-style scrolls. Find or buy a reusable scroll, then slot it on any <span class="text-amber-300">open</span> weapon power slot. Time signatures stay locked. Individual powers only — no reactions in this catalogue yet.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3">${chips}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">${viewToggleHtml()}<button onclick="RGD.openWizardryModal()" class="px-3 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Add Power</button></div>
+      </div>
+      ${body}`;
+  }
+  function wizardryTableHtml(list){
+    if(!list.length) return `<div class="py-12 text-center text-gray-500 text-sm">No wizardry powers.</div>`;
+    const rows=list.map(p=>{
+      const kindBadge=p.kind==='element_infusion'?'Infusion':(p.kind==='charged'?'Charged':(p.kind==='locked_signature'?'Locked':'Power'));
+      const stack=p.kind==='element_infusion'
+        ? `${esc(p.stackName||'?')}×${p.stackThreshold||5} → ${esc(p.procName||'?')}`
+        : (p.chargedName||p.name||'—');
+      return `<tr>
+        <td><span class="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}55">${esc(p.symbol||'?')}</span></td>
+        <td class="text-white font-medium">${esc(p.name)}</td>
+        <td class="text-gray-300">${esc(p.element)}</td>
+        <td><span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-900/40 text-violet-200">${kindBadge}</span></td>
+        <td class="text-gray-400 text-[11px]">${stack}</td>
+        <td class="text-gray-400">${p.findable?'Scroll':(p.reusable?'Reusable':'—')}${p.reusable&&p.findable?' · reusable':''}</td>
+        <td class="mono max-w-[140px] truncate" title="${esc(p.customItemId||'')}">${esc(p.customItemId||'—')}</td>
+        <td class="mono max-w-[140px] truncate" title="${esc(p.verseClass||'')}">${esc(p.verseClass||'—')}</td>
+        <td class="text-right whitespace-nowrap">
+          <button onclick="RGD.openWizardryModal('${p.id}')" class="text-gray-400 hover:text-white mr-2"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+          <button onclick="RGD.deleteWizardry('${p.id}')" class="text-gray-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl overflow-x-auto"><table class="cat-table min-w-[980px]"><thead><tr><th></th><th>Name</th><th>Element</th><th>Kind</th><th>Stack / Charge</th><th>Loot</th><th>Custom item</th><th>Verse</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function setWizardryFilter(c){ state.meta.wizardryFilter=c; save(); renderWizardry(); lucide.createIcons(); }
+
+  function wizardryCard(p){
+    const kindBadge=p.kind==='element_infusion'?'Infusion':(p.kind==='charged'?'Charged':(p.kind==='locked_signature'?'Locked':'Power'));
+    const meta=p.kind==='element_infusion'
+      ? `<div class="text-[11px] text-gray-400 mt-2">Stack <span class="text-white">${esc(p.stackName||'?')}</span> ×${p.stackThreshold||5} → <span class="text-amber-300">${esc(p.procName||'?')}</span></div><p class="text-[11px] text-gray-500 mt-1">${esc(p.procDesc||p.desc||'')}</p>`
+      : `<p class="text-[11px] text-gray-500 mt-2">${esc(p.chargedDesc||p.desc||'')}</p>`;
+    return `<div class="bg-gray-800 border border-gray-700 rounded-xl p-4">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}55">${esc(p.symbol||'?')}</div>
+          <div class="min-w-0"><div class="text-sm font-semibold text-white truncate">${esc(p.name)}</div>
+            <div class="flex gap-1 mt-1 flex-wrap">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">${esc(p.element)}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-900/40 text-violet-200">${kindBadge}</span>
+              ${p.findable?'<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/40 text-emerald-200">Scroll</span>':''}
+              ${p.reusable?'<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 text-gray-300">Reusable</span>':''}
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-1 shrink-0"><button onclick="RGD.openWizardryModal('${p.id}')" class="text-gray-500 hover:text-white"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button><button onclick="RGD.deleteWizardry('${p.id}')" class="text-gray-500 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>
+      </div>
+      ${meta}
+      <div class="mt-3 text-[10px] text-gray-500 break-all"><span class="text-gray-600">Custom item:</span> <code class="text-amber-300">${esc(p.customItemId||'—')}</code></div>
+      <div class="mt-1 text-[10px] text-gray-500 break-all"><span class="text-gray-600">Verse:</span> <code class="text-emerald-300">${esc(p.verseClass||'—')}</code></div>
+      <div class="mt-1 text-[10px] text-gray-500 break-all"><span class="text-gray-600">UEFN custom item:</span> <code class="text-indigo-300">${esc(p.uefnCustomItem||'(set in Details / @editable)')}</code></div>
+    </div>`;
+  }
+
+  function openWizardryModal(id){
+    ensureWizardry();
+    const p=state.wizardry.find(x=>x.id===id)||{name:'',element:'Fire',kind:'element_infusion',color:'#a855f7',symbol:'W',desc:'',stackName:'',stackThreshold:5,procName:'',procDesc:'',chargedName:'',chargedDesc:'',findable:true,buyable:true,reusable:true,customItemId:'',uefnCustomItem:'',verseClass:''};
+    modalShell(id?'Edit Wizardry Power':'Add Wizardry Power',`
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Name',`<input id="mName" value="${esc(p.name||'')}" class="${IN}">`)}
+        ${field('Element',`<select id="mEl" class="${IN}">${ELEMENT_ORDER.map(t=>`<option ${p.element===t?'selected':''}>${t}</option>`).join('')}</select>`)}
+        ${field('Kind',`<select id="mKind" class="${IN}"><option value="element_infusion" ${p.kind==='element_infusion'?'selected':''}>Element infusion</option><option value="charged" ${p.kind==='charged'?'selected':''}>Charged ability</option><option value="locked_signature" ${p.kind==='locked_signature'?'selected':''}>Locked signature</option></select>`)}
+        ${field('Symbol',`<input id="mSymbol" maxlength="1" value="${esc(p.symbol||'')}" class="${IN} text-center">`)}
+        ${field('Color',`<input id="mColor" type="color" value="${p.color||'#a855f7'}" class="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg">`)}
+        ${field('Stack threshold',`<input id="mThresh" type="number" value="${p.stackThreshold||5}" class="${IN}">`)}
+      </div>
+      ${field('Description',`<textarea id="mDesc" rows="2" class="${IN}">${esc(p.desc||'')}</textarea>`)}
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Stack name',`<input id="mStack" value="${esc(p.stackName||'')}" class="${IN}">`)}
+        ${field('Proc name (at threshold)',`<input id="mProc" value="${esc(p.procName||'')}" class="${IN}">`)}
+      </div>
+      ${field('Proc description',`<textarea id="mProcDesc" rows="2" class="${IN}">${esc(p.procDesc||'')}</textarea>`)}
+      <div class="grid grid-cols-2 gap-3">
+        ${field('Charged name',`<input id="mCharged" value="${esc(p.chargedName||'')}" class="${IN}">`)}
+        ${field('Custom item id (scroll)',`<input id="mItem" value="${esc(p.customItemId||'')}" placeholder="scroll_…" class="${IN} font-mono text-xs">`)}
+      </div>
+      ${field('Charged description',`<textarea id="mChargedDesc" rows="2" class="${IN}">${esc(p.chargedDesc||'')}</textarea>`)}
+      ${field('Verse class (@editable device ref)',`<input id="mVerse" value="${esc(p.verseClass||'')}" placeholder="wizardry_burn_infusion" class="${IN} font-mono text-xs">`)}
+      ${field('UEFN custom item class path',`<input id="mUeFnItem" value="${esc(p.uefnCustomItem||'')}" placeholder="(wire later in Verse device)" class="${IN} font-mono text-xs">`)}
+      <div class="flex gap-4 text-xs text-gray-300 mt-1">
+        <label class="flex items-center gap-2"><input id="mFind" type="checkbox" ${p.findable!==false?'checked':''}> Findable</label>
+        <label class="flex items-center gap-2"><input id="mBuy" type="checkbox" ${p.buyable!==false?'checked':''}> Buyable</label>
+        <label class="flex items-center gap-2"><input id="mReuse" type="checkbox" ${p.reusable!==false?'checked':''}> Reusable scroll</label>
+      </div>
+    `,`RGD.saveWizardry('${id||''}')`);
+  }
+
+  function saveWizardry(id){
+    const name=val('mName').trim(); if(!name)return toast('Name required','warn');
+    const findable=document.getElementById('mFind').checked;
+    const buyable=document.getElementById('mBuy').checked;
+    const reusable=document.getElementById('mReuse').checked;
+    const kind=val('mKind');
+    let cid=val('mItem').trim();
+    if(findable && !cid) cid='scroll_'+(id||name.toLowerCase().replace(/[^a-z0-9]+/g,'_'));
+    if(kind==='locked_signature') cid='';
+    const rec={
+      id:id||uid('power'), name, element:val('mEl'), kind, color:val('mColor'),
+      symbol:val('mSymbol')||name[0].toUpperCase(), desc:val('mDesc'),
+      stackName:val('mStack'), stackThreshold:parseInt(val('mThresh')||'5',10)||5,
+      procName:val('mProc'), procDesc:val('mProcDesc'),
+      chargedName:val('mCharged'), chargedDesc:val('mChargedDesc'),
+      findable, buyable, reusable, customItemId:cid,
+      uefnCustomItem:val('mUeFnItem').trim(),
+      verseClass:val('mVerse').trim()||('wizardry_'+(id||name.toLowerCase().replace(/[^a-z0-9]+/g,'_'))),
+      category:'Wizardry'
+    };
+    if(id){ const i=state.wizardry.findIndex(x=>x.id===id); state.wizardry[i]=rec; }
+    else state.wizardry.push(rec);
+    ensureWizardry();
+    save({flush:true}); closeModal(); renderWizardry(); toast('Power saved','ok');
+  }
+  function deleteWizardry(id){ state.wizardry=(state.wizardry||[]).filter(p=>p.id!==id); save({flush:true}); renderWizardry(); toast('Power deleted','ok'); }
+
+
+  /* ===== modals ===== */
+  function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+  function modalShell(title,body,saveFn){ document.getElementById('modalRoot').innerHTML=`
+    <div class="modal-back fixed inset-0 z-40 bg-black/60 flex items-center justify-center p-4" onclick="if(event.target===this)RGD.closeModal()">
+      <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700 sticky top-0 bg-gray-800"><h3 class="text-sm font-semibold text-white">${esc(title)}</h3><button onclick="RGD.closeModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+        <div class="p-5 space-y-4">${body}</div>
+        <div class="flex justify-end gap-2 px-5 py-3 border-t border-gray-700 sticky bottom-0 bg-gray-800"><button onclick="RGD.closeModal()" class="px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button><button onclick="${saveFn}" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm">Save</button></div>
+      </div></div>`; lucide.createIcons(); }
+  const field=(l,i)=>`<div><label class="text-[11px] text-gray-400 block mb-1">${l}</label>${i}</div>`;
+  const IN='w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm';
+
+  function openStatModal(id){ const s=state.stats.find(x=>x.id===id)||{id:'',name:'',def:0};
+    modalShell(id?'Edit Stat':'New Stat',`${field('Stat ID (used by MCP tools)',`<input id="mStatId" value="${esc(s.id)}" ${id?'readonly':''} placeholder="hp" class="${IN} ${id?'opacity-60':''}">`)}${field('Display Name',`<input id="mStatName" value="${esc(s.name)}" placeholder="Health" class="${IN}">`)}${field('Default Value',`<input id="mStatDef" type="number" value="${s.def}" class="${IN}">`)}`,`RGD.saveStat('${id||''}')`); }
+  function saveStat(id){ const name=val('mStatName').trim(); let sid=id||val('mStatId').trim().toLowerCase().replace(/[^a-z0-9_]/g,'_'); const def=Number(val('mStatDef'))||0;
+    if(!sid||!name)return toast('ID and name required','warn'); if(!id&&state.stats.some(s=>s.id===sid))return toast('Stat id exists','warn');
+    if(id){ const s=state.stats.find(x=>x.id===id); s.name=name; s.def=def; } else { state.stats.push({id:sid,name,def}); state.npcs.forEach(n=>{n.stats=n.stats||{}; if(n.stats[sid]==null)n.stats[sid]=def;}); state.items.forEach(i=>{i.stats=i.stats||{}; if(i.stats[sid]==null)i.stats[sid]=0;}); }
+    save({flush:true}); closeModal(); renderStats(); toast('Stat saved','ok'); }
+  function deleteStat(id){ state.stats=state.stats.filter(s=>s.id!==id); state.npcs.forEach(n=>{if(n.stats)delete n.stats[id];}); state.items.forEach(i=>{if(i.stats)delete i.stats[id];}); save({flush:true}); renderStats(); toast('Stat deleted','ok'); }
+
+  function statFieldsHtml(e,isItem){ return state.stats.map(s=>{ const v=(e.stats&&e.stats[s.id]!=null)?e.stats[s.id]:(isItem?0:s.def);
+    return `<div class="flex items-center gap-2"><span class="text-xs text-gray-400 w-24 truncate">${esc(s.name)}${isItem?' Δ':''}</span><input data-stat="${s.id}" type="number" value="${v}" class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm"></div>`; }).join('')||`<div class="text-xs text-gray-600">Define Global Stats first.</div>`; }
+  function collectStats(){ const o={}; document.querySelectorAll('#mStats [data-stat]').forEach(inp=>{ o[inp.dataset.stat]=Number(inp.value)||0; }); return o; }
+
+  function diffFieldsHtml(n){
+    const ds=n.difficultyStats||[];
+    const rows=(state.difficulties||[{index:0,name:'Easy'},{index:1,name:'Normal'},{index:2,name:'Hard'}]).map((d,i)=>{
+      const s=ds[d.index!=null?d.index:i]||{maxHealth:100,damageMultiplier:1,dodgeChance:0,moveSpeedMultiplier:1,spawnWeight:1};
+      const p='d'+i;
+      return `<div class="border border-gray-700 rounded-lg p-3 space-y-2"><div class="text-xs font-semibold text-indigo-300">${esc(d.name||diffLabel(i))}</div>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <label class="text-gray-500">Max HP<input data-diff="${p}" data-k="maxHealth" type="number" step="0.1" value="${s.maxHealth||0}" class="${IN} mt-1 py-1"></label>
+          <label class="text-gray-500">Dmg mult<input data-diff="${p}" data-k="damageMultiplier" type="number" step="0.01" value="${s.damageMultiplier||1}" class="${IN} mt-1 py-1"></label>
+          <label class="text-gray-500">Dodge %<input data-diff="${p}" data-k="dodgeChance" type="number" value="${s.dodgeChance||0}" class="${IN} mt-1 py-1"></label>
+          <label class="text-gray-500">Speed mult<input data-diff="${p}" data-k="moveSpeedMultiplier" type="number" step="0.01" value="${s.moveSpeedMultiplier||1}" class="${IN} mt-1 py-1"></label>
+        </div></div>`;
+    }).join('');
+    return rows||'<div class="text-xs text-gray-600">Difficulty stats auto-generated on save.</div>';
+  }
+  function collectDiffStats(){
+    const out=[]; for(let i=0;i<3;i++){
+      const o={maxHealth:100,damageMultiplier:1,dodgeChance:0,moveSpeedMultiplier:1,spawnWeight:1};
+      document.querySelectorAll(`[data-diff="d${i}"]`).forEach(inp=>{ o[inp.dataset.k]=Number(inp.value)||0; });
+      out.push(o);
+    } return out;
+  }
+  function openNPCModal(id){ const n=state.npcs.find(x=>x.id===id)||{name:'',type:'Enemy',role:'Melee',symbol:'E',color:'#ef4444',behavior:'Aggressive',stats:{},difficultyStats:[],currencyDrop:{}};
+    const curT=npcType(n), curR=npcRole(n); ensureCurrencies();
+    modalShell(id?'Edit NPC':'Create NPC',`<div class="grid grid-cols-2 gap-3">${field('Name',`<input id="mName" value="${esc(n.name)}" class="${IN}">`)}${field('Type',`<select id="mType" class="${IN}">${NPC_TYPES.map(t=>`<option ${curT===t?'selected':''}>${t}</option>`).join('')}</select>`)}${field('Role',`<select id="mRole" class="${IN}">${NPC_ROLES.map(t=>`<option ${curR===t?'selected':''}>${t}</option>`).join('')}</select>`)}${field('Symbol (1 char)',`<input id="mSymbol" maxlength="1" value="${esc(n.symbol||'')}" class="${IN} text-center">`)}${field('Color',`<input id="mColor" type="color" value="${n.color||'#ef4444'}" class="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg">`)}${field('AI Behavior',`<input id="mBehavior" value="${esc(n.behavior||'')}" placeholder="Melee Chaser / Friendly Caster" class="${IN}">`)}</div><p class="text-[11px] text-gray-500 mt-1">Type = who they are (Enemy / Elite / Boss / Friendly). Role = how they fight — Friendlies are people like Wizard Bob.</p><div class="mt-3"><div class="text-[11px] text-gray-400 mb-2">Currency drop (granted on kill)</div>${currencyAmountFields(n.currencyDrop||{},'mDrop')}</div><div class="mt-3"><div class="text-[11px] text-gray-400 mb-2">Base Stats (Normal tier reference)</div><div class="space-y-2" id="mStats">${statFieldsHtml(n,false)}</div></div><div><div class="text-[11px] text-gray-400 mb-2">Per-Difficulty (matches Verse EasyStats/NormalStats/HardStats)</div><div id="mDiff" class="space-y-2">${diffFieldsHtml(n)}</div></div>`,`RGD.saveNPC('${id||''}')`); }
+  function saveNPC(id){ const name=val('mName').trim(); if(!name)return toast('Name required','warn');
+    const rec={ id:id||uid('npc'), name, type:val('mType'), role:val('mRole'), symbol:val('mSymbol')||name[0].toUpperCase(), color:val('mColor'), behavior:val('mBehavior'), stats:collectStats(), difficultyStats:collectDiffStats(), currencyDrop:collectCurrencyBag('mDrop') };
+    if(id){ const i=state.npcs.findIndex(x=>x.id===id); state.npcs[i]=rec; } else state.npcs.push(rec);
+    save({flush:true}); closeModal(); renderNPCs(); if(state.meta.activeTab==='difficulties')renderDifficulties(); toast('NPC saved','ok'); }
+  function deleteNPC(id){ state.npcs=state.npcs.filter(n=>n.id!==id); stripEntity('npc',id); save({flush:true}); renderNPCs(); toast('NPC deleted','ok'); }
+
+  function openItemModal(id){ const it=state.items.find(x=>x.id===id)||{name:'',category:'Health',symbol:'i',color:'#22c55e',desc:'',stats:{},currencyReward:{},price:{currencyId:'gold',amount:0}};
+    const cur=dropCategory(it); ensureCurrencies();
+    modalShell(id?'Edit Drop':'Add Drop',`<div class="grid grid-cols-2 gap-3">${field('Name',`<input id="mName" value="${esc(it.name)}" class="${IN}">`)}${field('Category',`<select id="mCat" class="${IN}">${DROP_CATEGORIES.map(t=>`<option ${cur===t?'selected':''}>${t}</option>`).join('')}</select>`)}${field('Symbol (1 char)',`<input id="mSymbol" maxlength="1" value="${esc(it.symbol||'')}" class="${IN} text-center">`)}${field('Color',`<input id="mColor" type="color" value="${it.color}" class="w-full h-9 bg-gray-900 border border-gray-700 rounded-lg">`)}</div>${field('Description',`<textarea id="mDesc" rows="2" class="${IN}">${esc(it.desc||'')}</textarea>`)}<div><div class="text-[11px] text-gray-400 mb-2">Stat Modifiers (applied on pickup)</div><div class="space-y-2" id="mStats">${statFieldsHtml(it,true)}</div></div><div class="mt-3"><div class="text-[11px] text-gray-400 mb-2">Currency reward (granted on pickup)</div>${currencyAmountFields(it.currencyReward||{},'mRew')}</div><div class="mt-3"><div class="text-[11px] text-gray-400 mb-2">Shop price (0 = not sold)</div>${priceFieldsHtml(it.price,'mPrice')}</div>`,`RGD.saveItem('${id||''}')`); }
+  function saveItem(id){ const name=val('mName').trim(); if(!name)return toast('Name required','warn');
+    const rec={ id:id||uid('item'), name, category:val('mCat'), symbol:val('mSymbol')||name[0].toLowerCase(), color:val('mColor'), desc:val('mDesc'), stats:collectStats(), currencyReward:collectCurrencyBag('mRew'), price:collectPrice('mPrice') };
+    if(id){ const i=state.items.findIndex(x=>x.id===id); state.items[i]=rec; } else state.items.push(rec);
+    save({flush:true}); closeModal(); renderItems(); toast('Drop saved','ok'); }
+  function deleteItem(id){ state.items=state.items.filter(i=>i.id!==id); stripEntity('item',id); save({flush:true}); renderItems(); toast('Drop deleted','ok'); }
+  function stripEntity(kind,id){ state.levels.forEach(l=>{ iterPainted(l).forEach(([x,y,c])=>{ if(c.entity&&c.entity.kind===kind&&c.entity.id===id){ c=Object.assign({},c,{entity:null}); setCell(l,x,y,c); } }); }); }
+
+  /* ===== level ops ===== */
+  function newLevel(){ const w=16,h=12; const lvl={ id:uid('lvl'), name:'Level '+(state.levels.length+1), theme:'#6366f1', threat:'Medium', w, h, grid:makeGrid(w,h), overlay:{file:'',opacity:0.55,enabled:false,stretch:true} };
+    state.levels.push(lvl); state.meta.activeLevelId=lvl.id; save({flush:true});
+    if(state.meta.activeTab!=='levels') go('levels'); else renderLevels(); toast('Level created','ok'); }
+  function selectLevel(id){ state.meta.activeLevelId=id||null; view.fitted=false; save(); renderLevels(); }
+  function updateLevelField(k,v){ const l=activeLevel(); if(!l)return; l[k]=v; save(); renderLevels(); }
+  function resizeLevel(){ const l=activeLevel(); if(!l)return; const w=clamp(+val('lvlW'),4,GRID_MAX),h=clamp(+val('lvlH'),4,GRID_MAX); pushUndo(l); l.grid=makeGrid(w,h,l.grid); l.w=w; l.h=h; view.fitted=false; save({flush:true}); renderLevels(); toast('Grid resized to '+w+'×'+h+(isSparseGrid(l.grid)?' (sparse)':''),'ok'); }
+  function resetLevel(){ const l=activeLevel(); if(!l)return; pushUndo(l); l.grid=makeGrid(l.w,l.h); save({flush:true}); renderLevels(); refreshStatus(); toast('Grid cleared','warn'); }
+  async function saveLevel(){
+    toast('Saving…','info');
+    try{
+      const r=await flushSave();
+      if(!r||!r.ok) return toast('Save FAILED: '+((r&&r.error)||'unknown'),'err');
+      // Read the store back so the toast proves what actually landed on disk.
+      const back=await rgdRpc('get_store',{});
+      const n=(back&&back.ok&&back.state)?paintedCount(back.state):null;
+      toast(n===null?'Design saved':('Design saved · '+n+' painted cells on disk'),'ok');
+    }catch(e){ toast('Save FAILED: '+e,'err'); }
+  }
+  function deleteLevel(id){ state.levels=state.levels.filter(l=>l.id!==id); if(state.meta.activeLevelId===id)state.meta.activeLevelId=(state.levels[0]&&state.levels[0].id)||null; save({flush:true}); renderLevels(); refreshStatus(); toast('Level deleted','ok'); }
+  function pickTool(t){ paint.tool=t; paint.entity=null; renderLevels(); }
+  function pickEntity(kind,id){ paint.entity=kind+':'+id; paint.tool='entity'; renderLevels(); }
+  function ensureLevelOverlay(l){
+    if(!l.overlay) l.overlay={file:'',opacity:0.55,enabled:false,stretch:true};
+    return l.overlay;
+  }
+  function setOverlayField(k,v){
+    const l=activeLevel(); if(!l)return;
+    const ov=ensureLevelOverlay(l);
+    ov[k]=v;
+    save(); renderLevels();
+  }
+  function setOverlayOpacity(pct){
+    const l=activeLevel(); if(!l)return;
+    const ov=ensureLevelOverlay(l);
+    const op=Math.max(0.05,Math.min(1,(Number(pct)||55)/100));
+    ov.opacity=op;
+    const lab=document.getElementById('ovOpacityLabel'); if(lab) lab.textContent=Math.round(op*100)+'%';
+    const img=document.getElementById('mapOverlayImg'); if(img) img.style.opacity=String(op);
+    save();
+  }
+  function clearOverlay(){
+    const l=activeLevel(); if(!l)return;
+    if(l.overlay&&l.overlay.file) delete _overlayDiskCache[l.id+'::'+l.overlay.file];
+    l.overlay={file:'',opacity:0.55,enabled:false,stretch:true};
+    _overlayCache={id:null,file:'',dataUrl:''};
+    save({flush:true});
+    renderLevels(); toast('Overlay cleared','ok');
+  }
+  function downscaleDataUrl(dataUrl, maxEdge){
+    return new Promise(function(resolve){
+      try{
+        const img=new Image();
+        img.onload=function(){
+          const w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+          const edge=Math.max(w,h);
+          if(!edge || edge<=maxEdge){ resolve(dataUrl); return; }
+          const scale=maxEdge/edge;
+          const cw=Math.max(1,Math.round(w*scale)), ch=Math.max(1,Math.round(h*scale));
+          const c=document.createElement('canvas'); c.width=cw; c.height=ch;
+          const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,cw,ch);
+          resolve(c.toDataURL('image/jpeg',0.88));
+        };
+        img.onerror=function(){ resolve(dataUrl); };
+        img.src=dataUrl;
+      }catch(_){ resolve(dataUrl); }
+    });
+  }
+  function onOverlayFile(input){
+    const l=activeLevel(); if(!l||!input||!input.files||!input.files[0])return;
+    const f=input.files[0];
+    const reader=new FileReader();
+    reader.onload=async ()=>{
+      let dataUrl=String(reader.result||'');
+      if(!dataUrl){ toast('Failed to read image','err'); return; }
+      // Shrink huge maps before bridge RPC so save does not time out.
+      dataUrl=await downscaleDataUrl(dataUrl, 4096);
+      const ov=ensureLevelOverlay(l);
+      ov.enabled=true;
+      ov._dataUrl=dataUrl;
+      ov.source_name=f.name||ov.source_name||'';
+      _overlayCache={id:l.id,file:ov.file||f.name,dataUrl};
+      let persisted=false;
+      try{
+        if(_hydrated){
+          // Ensure the level exists in the backend store before writing the image file.
+          await flushSave();
+          const r=await rgdRpc('save_overlay_image',{
+            level_id:l.id, data_url:dataUrl, file_name:f.name||'',
+            opacity:ov.opacity||0.55, enabled:true, stretch:ov.stretch!==false
+          },90000);
+          if(r&&r.ok&&r.overlay){
+            Object.assign(ov, r.overlay);
+            // Keep preview so tab switches never blank the map while disk preview loads.
+            ov._dataUrl=dataUrl;
+            if(ov.file) _overlayDiskCache[l.id+'::'+ov.file]=dataUrl;
+            _overlayCache={id:l.id,file:ov.file,dataUrl};
+            persisted=true;
+            toast('Overlay saved','ok');
+          } else {
+            toast('Overlay preview only — save failed: '+((r&&r.error)||'unknown'),'warn');
+          }
+        }
+      }catch(e){ toast('Overlay preview only — '+e,'warn'); }
+      if(!persisted){
+        ov.file=f.name||('overlay_'+l.id+'.png');
+        ov._dataUrl=dataUrl;
+        _overlayDiskCache[l.id+'::'+ov.file]=dataUrl;
+      }
+      await flushSave();
+      renderLevels();
+      try{ input.value=''; }catch(_){}
+    };
+    reader.onerror=()=>toast('Failed to read image','err');
+    reader.readAsDataURL(f);
+  }
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+
+  /* ===== ACT ===== */
+  async function spawnEntity(kind,id){ const lvl=activeLevel();
+    const tool=kind==='npc'?'spawn_npc_in_uefn':'spawn_item_in_uefn';
+    const args=kind==='npc'?{npc_id:id,level_id:lvl?lvl.id:null,x:lvl?Math.floor(lvl.w/2):0,y:lvl?Math.floor(lvl.h/2):0}:{item_id:id,level_id:lvl?lvl.id:null,x:lvl?Math.floor(lvl.w/2):0,y:lvl?Math.floor(lvl.h/2):0};
+    const res=await bridge.call(tool,args);
+    if(res&&res.error)return toast('Spawn failed: '+res.error,'err'); if(res&&res.skipped)return toast('Already spawned','warn');
+    toast('Spawned '+((res&&res.label)||id)+' → '+((res&&res.folder)||''),'ok'); refreshStatus(); if(state.meta.activeTab==='mcp')renderMCP(); }
+  async function buildLevel(id){ const lvl=state.levels.find(l=>l.id===id); if(!lvl)return; toast('Building '+lvl.name+' in UEFN…','info');
+    const res=await bridge.call('build_level_in_uefn',{level_id:id});
+    if(res&&res.error)return toast('Build failed: '+res.error,'err');
+    toast(`${lvl.name}: ${res.walls||0} walls, ${res.doors||0} doors, ${res.entities||0} entities`,'ok');
+    if(res.warnings&&res.warnings.length)toast(res.warnings.length+' warning(s)','warn'); refreshStatus(); renderDashboard(); if(state.meta.activeTab==='mcp')renderMCP(); }
+  async function syncFromUEFN(){ const res=await bridge.call('sync_from_uefn',{level_id:state.meta.activeLevelId});
+    if(res&&res.error)return toast('Sync failed: '+res.error,'err'); toast('Pulled '+((res&&res.pulled)||0)+' actors from UEFN','ok'); refreshStatus(); renderMCP(); }
+  async function pushEverything(){ if(!state.levels.length&&!state.npcs.length)return toast('Nothing to push yet','warn'); toast('Pushing all levels to UEFN…','info'); let total=0;
+    for(const l of state.levels){ const res=await bridge.call('build_level_in_uefn',{level_id:l.id}); if(res&&!res.error)total+=(res.actors||0); }
+    toast('Pushed everything · '+total+' actors live','ok'); refreshStatus(); renderDashboard(); if(state.meta.activeTab==='mcp')renderMCP(); }
+
+  function val(id){ const el=document.getElementById(id); return el?el.value:''; }
+
+  /* ===== boot ===== */
+  async function resolveProjectKey(){
+    try{
+      const r=await rgdRpc('get_project_key',{},6000);
+      if(r&&r.ok&&r.key){ projectKey=r.key; return projectKey; }
+    }catch(e){}
+    try{
+      const s=await bridge.raw('rgd_get_state',{});
+      if(s&&s.meta&&s.meta.projectKey){ projectKey=s.meta.projectKey; return projectKey; }
+    }catch(e){}
+    return projectKey;
+  }
+  async function fetchDefaults(){
+    try{
+      const r=await fetch('../assets/defaults.json');
+      if(!r.ok) return null;
+      return await r.json();
+    }catch(e){ return null; }
+  }
+  /* Load = read the store. Nothing else. A failed read leaves _hydrated false so
+     no later save can write defaults over the design that is still on disk. */
+  async function hydrateState(){
+    await resolveProjectKey();
+    let disk=null, storeErr='';
+    try{
+      const r=await rgdRpc('get_store',{},30000);
+      if(r&&r.ok&&r.state) disk=r.state;
+      else storeErr=(r&&(r.error||r.message))||'get_store returned nothing';
+    }catch(e){ storeErr=String(e&&e.message||e); }
+    if(!disk){
+      // No store = no idea what is saved. Stay read-only rather than invent a design.
+      _hydrated=false; _hydratedKey=null;
+      toast('Cannot reach the design store ('+storeErr+') — READ-ONLY, nothing will be saved','err');
+      return false;
+    }
+    // A brand-new project comes back empty — seed it from the shipped defaults.
+    const empty=!(disk.levels||[]).length && !(disk.npcs||[]).length;
+    const merged=Object.assign(seed(), empty?((await fetchDefaults())||disk):disk);
+    if(!merged.difficulties||!merged.difficulties.length) merged.difficulties=seed().difficulties;
+    if(!merged.weapons) merged.weapons=[];
+    if(!merged.wizardry) merged.wizardry=[];
+    if(!merged.elements) merged.elements=[];
+    if(!merged.currencies) merged.currencies=[];
+    state=merged;
+    _hydrated=true; _hydratedKey=projectKey;
+    const seeded=ensureCurrencies();
+    if(normalizeDrops() || normalizeNpcs() || seeded) save();
+    return true;
+  }
+  let _booted=false, _booting=false, _hostBound=false, _statusTimer=null, _loadTries=0;
+  async function init(){
+    if(_booting) return;
+    _booting=true;
+    try{
+      // Re-init only when project key changes — host-ready used to wipe in-memory edits.
+      const prevKey=projectKey;
+      buildNav();
+      if(!_booted){
+        await hydrateState();
+      } else {
+        const k=await resolveProjectKey();
+        // Re-read on project switch, and retry a load that failed earlier.
+        if(k!==prevKey || !_hydrated) await hydrateState();
+      }
+      ensureWeapons(); ensureWizardry();
+      go(state.meta.activeTab||'dashboard');
+      if(!_statusTimer) _statusTimer=setInterval(refreshStatus,5000);
+      refreshStatus();
+      if(!_hostBound){
+        _hostBound=true;
+        window.addEventListener('rgd:host-ready',()=>{ init(); });
+        window.addEventListener('keydown', onEditorKey);
+        // Every edit already writes within 250ms; these only flush a pending debounce.
+        window.addEventListener('pagehide', ()=>{ try{ flushSave(); }catch(_){ } });
+        window.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ try{ flushSave(); }catch(_){ } } });
+      }
+      _booted=true;
+      lucide.createIcons();
+      // The bridge can come up after the panel does — keep retrying the load a few
+      // times instead of sitting read-only forever.
+      if(!_hydrated && _loadTries<5){ _loadTries++; setTimeout(init, 2000); }
+    } finally { _booting=false; }
+  }
+
+  return { init, go, toast, closeModal,
+    setCatalogueView,
+    openStatModal, saveStat, deleteStat,
+    openNPCModal, saveNPC, deleteNPC, setNpcTypeFilter, setNpcRoleFilter,
+    openItemModal, saveItem, deleteItem, setDropFilter,
+    openCurrencyModal, saveCurrency, deleteCurrency,
+    openWeaponModal, saveWeapon, deleteWeapon, setWeaponFilter,
+    openWizardryModal, saveWizardry, deleteWizardry, setWizardryFilter,
+    newLevel,setOverlayField,setOverlayOpacity,clearOverlay,onOverlayFile, selectLevel, updateLevelField, resizeLevel, resetLevel, saveLevel, deleteLevel, pickTool, pickEntity,
+    undoPaint, redoPaint,
+    fitGrid, centerGrid, zoomBy,
+    spawnEntity, buildLevel, syncFromUEFN, pushEverything,
+    _state:()=>state, _bridge:bridge, _sync:computeSyncStatus,
+    _dropCategory:dropCategory, _npcType:npcType, _npcRole:npcRole, _hydrated:()=>_hydrated, _save:save };
+})();
+document.addEventListener('DOMContentLoaded', RGD.init);
+</script>
+</body>
+</html>

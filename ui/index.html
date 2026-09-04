@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-950">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roguelike Game Design Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="text-gray-200 antialiased">
+<div class="flex h-screen overflow-hidden">
+  <!-- SIDEBAR -->
+  <aside class="w-60 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-4 py-4 border-b border-gray-800">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center"><i data-lucide="swords" class="w-5 h-5 text-white"></i></div>
+        <div><div class="text-sm font-semibold text-white leading-tight">Roguelike</div><div class="text-[11px] text-gray-400 leading-tight">Design Platform</div></div>
+      </div>
+    </div>
+    <nav class="flex-1 py-2 overflow-y-auto" id="nav"></nav>
+    <div class="p-3 border-t border-gray-800 space-y-2 text-[11px]">
+      <div class="flex items-center gap-2"><span id="chipListenerDot" class="chip-dot bg-gray-500"></span><span id="chipListenerText" class="text-gray-400">Listener: checking…</span></div>
+      <div class="flex items-center gap-2"><span id="chipSyncDot" class="chip-dot bg-gray-500"></span><span id="chipSyncText" class="text-gray-400">Sync: unknown</span></div>
+      <div class="text-gray-600" id="chipMode">mode: standalone</div>
+    </div>
+  </aside>
+
+  <!-- MAIN: list ↔ detail slide (same pattern as Duckies Settings / Discord bots) -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <header class="shrink-0 z-10 bg-gray-900/80 backdrop-blur border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+      <div>
+        <h1 id="pageTitle" class="text-lg font-semibold text-white">Dashboard</h1>
+        <p id="pageSub" class="text-xs text-gray-400">Per-project design source of truth · UI, MCP tools &amp; skills</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs">
+          <span id="hdrListenerDot" class="chip-dot bg-gray-500"></span><span id="hdrListenerText" class="text-gray-300">UEFN</span>
+        </div>
+      </div>
+    </header>
+    <div class="slide-body" id="slideBody">
+      <div class="list-shell" id="listShell">
+        <div class="list-pane p-6">
+          <section id="tab-dashboard" class="tab-pane is-active"></section>
+          <section id="tab-levels" class="tab-pane"></section>
+          <section id="tab-assets" class="tab-pane"></section>
+          <!-- legacy hosts kept hidden — Chunks/Procgen live under Levels subtabs -->
+          <section id="tab-chunks" class="tab-pane hidden" aria-hidden="true"></section>
+          <section id="tab-procgen" class="tab-pane hidden" aria-hidden="true"></section>
+          <section id="tab-npcs" class="tab-pane"></section>
+          <section id="tab-items" class="tab-pane"></section>
+          <section id="tab-droptables" class="tab-pane"></section>
+          <section id="tab-currencies" class="tab-pane"></section>
+          <section id="tab-progression" class="tab-pane"></section>
+          <section id="tab-weapons" class="tab-pane"></section>
+          <section id="tab-wizardry" class="tab-pane"></section>
+          <section id="tab-uiscreens" class="tab-pane"></section>
+          <section id="tab-stats" class="tab-pane"></section>
+          <section id="tab-difficulties" class="tab-pane"></section>
+          <section id="tab-mcp" class="tab-pane"></section>
+        </div>
+      </div>
+      <div class="detail" id="detailPane" aria-hidden="true"></div>
+    </div>
+  </main>
+</div>
+<div id="modalRoot"></div>
+<div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 w-80"></div>
+
+<script src="js/bridge.js"></script>
+<script src="js/rgd.js"></script>
+</body>
+</html>

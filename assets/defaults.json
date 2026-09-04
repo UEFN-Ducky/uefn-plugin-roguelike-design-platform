@@ -1,0 +1,4906 @@
+{
+  "version": 8,
+  "stats": [
+    {
+      "id": "hp",
+      "name": "Health",
+      "def": 100
+    },
+    {
+      "id": "attack",
+      "name": "Attack Damage",
+      "def": 20
+    },
+    {
+      "id": "defense",
+      "name": "Defense",
+      "def": 5
+    },
+    {
+      "id": "speed",
+      "name": "Speed",
+      "def": 300
+    },
+    {
+      "id": "range",
+      "name": "Attack Range (cm)",
+      "def": 220
+    },
+    {
+      "id": "cooldown",
+      "name": "Attack Cooldown (s)",
+      "def": 1.3
+    },
+    {
+      "id": "chaserange",
+      "name": "Max Chase Range (cm)",
+      "def": 8000
+    },
+    {
+      "id": "spread",
+      "name": "Spread Distance (cm)",
+      "def": 260
+    },
+    {
+      "id": "sidestep",
+      "name": "Sidestep Chance (%)",
+      "def": 35
+    }
+  ],
+  "difficulties": [
+    {
+      "id": "easy",
+      "name": "Easy",
+      "index": 0,
+      "enemyCountPercent": 75,
+      "description": "Fewer enemies, weaker stats \u2014 good for learning routes."
+    },
+    {
+      "id": "normal",
+      "name": "Normal",
+      "index": 1,
+      "enemyCountPercent": 100,
+      "description": "Designed wave counts and baseline enemy tuning."
+    },
+    {
+      "id": "hard",
+      "name": "Hard",
+      "index": 2,
+      "enemyCountPercent": 150,
+      "description": "More enemies, +50% HP, +35% damage, higher dodge."
+    }
+  ],
+  "currencies": [
+    {
+      "id": "gold",
+      "name": "Gold",
+      "symbol": "G",
+      "color": "#fbbf24",
+      "desc": "Common loot coin \u2014 enemy drops, chests, vendors.",
+      "startingAmount": 0
+    },
+    {
+      "id": "gems",
+      "name": "Gems",
+      "symbol": "\u25c6",
+      "color": "#a78bfa",
+      "desc": "Rare crystal \u2014 elite/boss rewards and premium shops.",
+      "startingAmount": 0
+    },
+    {
+      "id": "keys",
+      "name": "Keys",
+      "symbol": "\ud83d\udd11",
+      "color": "#38bdf8",
+      "desc": "Unlocks chests and locked doors.",
+      "startingAmount": 0
+    }
+  ],
+  "progression": {
+    "maxLevel": 30,
+    "pointsPerLevel": 1,
+    "levelTable": [
+      {
+        "level": 1,
+        "xp": 117,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 2,
+        "xp": 275,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 3,
+        "xp": 478,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 4,
+        "xp": 730,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 5,
+        "xp": 1035,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 6,
+        "xp": 1397,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 7,
+        "xp": 1820,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 8,
+        "xp": 2308,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 9,
+        "xp": 2865,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 10,
+        "xp": 3495,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 11,
+        "xp": 4202,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 12,
+        "xp": 4990,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 13,
+        "xp": 5863,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 14,
+        "xp": 6825,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 15,
+        "xp": 7880,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 16,
+        "xp": 9032,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 17,
+        "xp": 10285,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 18,
+        "xp": 11643,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 19,
+        "xp": 13110,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 20,
+        "xp": 14690,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 21,
+        "xp": 16387,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 22,
+        "xp": 18205,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 23,
+        "xp": 20148,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 24,
+        "xp": 22220,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 25,
+        "xp": 24425,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 26,
+        "xp": 26767,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 27,
+        "xp": 29250,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 28,
+        "xp": 31878,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 29,
+        "xp": 34655,
+        "points": 1,
+        "notes": ""
+      },
+      {
+        "level": 30,
+        "xp": 37585,
+        "points": 1,
+        "notes": ""
+      }
+    ],
+    "scaling": [
+      {
+        "statId": "hp",
+        "label": "Health",
+        "base": 100,
+        "perLevel": 12,
+        "curve": "linear"
+      },
+      {
+        "statId": "attack",
+        "label": "Damage",
+        "base": 20,
+        "perLevel": 2.5,
+        "curve": "linear"
+      },
+      {
+        "statId": "defense",
+        "label": "Defense",
+        "base": 5,
+        "perLevel": 0.8,
+        "curve": "linear"
+      },
+      {
+        "statId": "speed",
+        "label": "Speed",
+        "base": 300,
+        "perLevel": 2,
+        "curve": "linear"
+      }
+    ],
+    "tree": {
+      "width": 900,
+      "height": 520,
+      "nodes": [
+        {
+          "id": "shield",
+          "name": "Shield",
+          "x": 60,
+          "y": 200,
+          "maxRank": 1,
+          "cost": 1,
+          "requires": [],
+          "icon": "shield",
+          "color": "#38bdf8",
+          "desc": "Unlock your starting shield.",
+          "effect": "Unlock Shield",
+          "statMods": {
+            "defense": 5
+          }
+        },
+        {
+          "id": "vitality",
+          "name": "Vitality",
+          "x": 60,
+          "y": 80,
+          "maxRank": 5,
+          "cost": 1,
+          "requires": [],
+          "icon": "heart",
+          "color": "#ef4444",
+          "desc": "More max health per rank.",
+          "effect": "+12 HP / rank",
+          "statMods": {
+            "hp": 12
+          }
+        },
+        {
+          "id": "might",
+          "name": "Might",
+          "x": 60,
+          "y": 320,
+          "maxRank": 5,
+          "cost": 1,
+          "requires": [],
+          "icon": "swords",
+          "color": "#f97316",
+          "desc": "Flat damage per rank.",
+          "effect": "+3 Attack / rank",
+          "statMods": {
+            "attack": 3
+          }
+        },
+        {
+          "id": "guard",
+          "name": "Guard",
+          "x": 240,
+          "y": 120,
+          "maxRank": 5,
+          "cost": 1,
+          "requires": [
+            "shield"
+          ],
+          "icon": "shield-check",
+          "color": "#22d3ee",
+          "desc": "Improve block strength.",
+          "effect": "+2 Defense / rank",
+          "statMods": {
+            "defense": 2
+          }
+        },
+        {
+          "id": "bulwark",
+          "name": "Bulwark",
+          "x": 240,
+          "y": 200,
+          "maxRank": 3,
+          "cost": 1,
+          "requires": [
+            "shield"
+          ],
+          "icon": "brick-wall",
+          "color": "#64748b",
+          "desc": "Heavier shield \u2014 more defense, slower.",
+          "effect": "+4 Defense / rank",
+          "statMods": {
+            "defense": 4,
+            "speed": -5
+          }
+        },
+        {
+          "id": "riposte",
+          "name": "Riposte",
+          "x": 240,
+          "y": 280,
+          "maxRank": 5,
+          "cost": 1,
+          "requires": [
+            "shield"
+          ],
+          "icon": "swords",
+          "color": "#eab308",
+          "desc": "Counter after a block.",
+          "effect": "+2 Attack / rank while shielded",
+          "statMods": {
+            "attack": 2
+          }
+        },
+        {
+          "id": "aegis",
+          "name": "Aegis",
+          "x": 440,
+          "y": 160,
+          "maxRank": 3,
+          "cost": 1,
+          "requires": [
+            "guard",
+            "bulwark"
+          ],
+          "icon": "sparkles",
+          "color": "#a855f7",
+          "desc": "Combine Guard + Bulwark into a true aegis.",
+          "effect": "+6 Defense / rank",
+          "statMods": {
+            "defense": 6
+          }
+        },
+        {
+          "id": "magic_find",
+          "name": "Magic Find",
+          "x": 440,
+          "y": 280,
+          "maxRank": 5,
+          "cost": 1,
+          "requires": [
+            "riposte"
+          ],
+          "icon": "clover",
+          "color": "#4ade80",
+          "desc": "Increases drop quantity.",
+          "effect": "+1 Drop Quantity / rank",
+          "statMods": {}
+        },
+        {
+          "id": "fortune",
+          "name": "Fortune",
+          "x": 660,
+          "y": 200,
+          "maxRank": 10,
+          "cost": 1,
+          "requires": [
+            "aegis",
+            "magic_find"
+          ],
+          "icon": "dices",
+          "color": "#fbbf24",
+          "desc": "Late-tree luck \u2014 skip until you have the points.",
+          "effect": "+Luck / rank",
+          "statMods": {}
+        },
+        {
+          "id": "crown",
+          "name": "Crown",
+          "x": 660,
+          "y": 320,
+          "maxRank": 3,
+          "cost": 2,
+          "requires": [
+            "aegis"
+          ],
+          "icon": "crown",
+          "color": "#f59e0b",
+          "desc": "Premium capstone. Costs 2 points per rank.",
+          "effect": "+8 Attack & +8 Defense / rank",
+          "statMods": {
+            "attack": 8,
+            "defense": 8
+          }
+        }
+      ]
+    }
+  },
+  "npcs": [
+    {
+      "id": "corpse_default",
+      "name": "Corpse (Default)",
+      "type": "Enemy",
+      "role": "Melee",
+      "symbol": "z",
+      "color": "#9ca3af",
+      "behavior": "Melee Chaser",
+      "stats": {
+        "hp": 100,
+        "attack": 18,
+        "defense": 5,
+        "speed": 300,
+        "range": 220,
+        "cooldown": 1.3,
+        "chaserange": 7500,
+        "spread": 260,
+        "sidestep": 35
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 75.0,
+          "damageMultiplier": 0.63,
+          "dodgeChance": 25,
+          "moveSpeedMultiplier": 0.9,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 100.0,
+          "damageMultiplier": 0.9,
+          "dodgeChance": 35,
+          "moveSpeedMultiplier": 1.0,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 150.0,
+          "damageMultiplier": 1.22,
+          "dodgeChance": 50,
+          "moveSpeedMultiplier": 1.1,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "roguelike_enemy_behavior"
+    },
+    {
+      "id": "melee_corpse",
+      "name": "Melee Corpse",
+      "type": "Enemy",
+      "role": "Melee",
+      "symbol": "m",
+      "color": "#ef4444",
+      "behavior": "Melee Chaser",
+      "stats": {
+        "hp": 100,
+        "attack": 20,
+        "defense": 5,
+        "speed": 300,
+        "range": 220,
+        "cooldown": 1.2,
+        "chaserange": 7500,
+        "spread": 260,
+        "sidestep": 35
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 75.0,
+          "damageMultiplier": 0.7,
+          "dodgeChance": 25,
+          "moveSpeedMultiplier": 0.9,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 100.0,
+          "damageMultiplier": 1.0,
+          "dodgeChance": 35,
+          "moveSpeedMultiplier": 1.0,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 150.0,
+          "damageMultiplier": 1.35,
+          "dodgeChance": 50,
+          "moveSpeedMultiplier": 1.1,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {
+        "gold": 5
+      },
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_melee_behavior"
+    },
+    {
+      "id": "sword_corpse",
+      "name": "Sword Corpse",
+      "type": "Enemy",
+      "role": "Melee",
+      "symbol": "s",
+      "color": "#f97316",
+      "behavior": "Melee Flurry",
+      "stats": {
+        "hp": 110,
+        "attack": 28,
+        "defense": 5,
+        "speed": 310,
+        "range": 250,
+        "cooldown": 0.85,
+        "chaserange": 8500,
+        "spread": 220,
+        "sidestep": 40
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 82.5,
+          "damageMultiplier": 0.98,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 0.93,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 110.0,
+          "damageMultiplier": 1.4,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 1.03,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 165.0,
+          "damageMultiplier": 1.89,
+          "dodgeChance": 55,
+          "moveSpeedMultiplier": 1.14,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_sword_behavior"
+    },
+    {
+      "id": "spear_corpse",
+      "name": "Spear Corpse",
+      "type": "Enemy",
+      "role": "Melee",
+      "symbol": "p",
+      "color": "#f59e0b",
+      "behavior": "Mid-Range Poker",
+      "stats": {
+        "hp": 105,
+        "attack": 24,
+        "defense": 5,
+        "speed": 295,
+        "range": 520,
+        "cooldown": 1.5,
+        "chaserange": 8000,
+        "spread": 0,
+        "sidestep": 45
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 78.8,
+          "damageMultiplier": 0.84,
+          "dodgeChance": 35,
+          "moveSpeedMultiplier": 0.89,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 105.0,
+          "damageMultiplier": 1.2,
+          "dodgeChance": 45,
+          "moveSpeedMultiplier": 0.98,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 157.5,
+          "damageMultiplier": 1.62,
+          "dodgeChance": 60,
+          "moveSpeedMultiplier": 1.08,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_spear_behavior"
+    },
+    {
+      "id": "charger",
+      "name": "Charger",
+      "type": "Enemy",
+      "role": "Charger",
+      "symbol": "c",
+      "color": "#eab308",
+      "behavior": "Charger",
+      "stats": {
+        "hp": 120,
+        "attack": 40,
+        "defense": 8,
+        "speed": 340,
+        "range": 280,
+        "cooldown": 2.2,
+        "chaserange": 9000,
+        "spread": 240,
+        "sidestep": 30
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 90.0,
+          "damageMultiplier": 1.4,
+          "dodgeChance": 20,
+          "moveSpeedMultiplier": 1.02,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 120.0,
+          "damageMultiplier": 2.0,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 1.13,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 180.0,
+          "damageMultiplier": 2.7,
+          "dodgeChance": 45,
+          "moveSpeedMultiplier": 1.25,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_charger_behavior"
+    },
+    {
+      "id": "large_charger",
+      "name": "Large Charger",
+      "type": "Elite",
+      "role": "Charger",
+      "symbol": "C",
+      "color": "#a16207",
+      "behavior": "Heavy Charger",
+      "stats": {
+        "hp": 180,
+        "attack": 65,
+        "defense": 12,
+        "speed": 280,
+        "range": 360,
+        "cooldown": 3.0,
+        "chaserange": 9500,
+        "spread": 320,
+        "sidestep": 25
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 135.0,
+          "damageMultiplier": 2.27,
+          "dodgeChance": 15,
+          "moveSpeedMultiplier": 0.84,
+          "spawnWeight": 2
+        },
+        {
+          "maxHealth": 180.0,
+          "damageMultiplier": 3.25,
+          "dodgeChance": 25,
+          "moveSpeedMultiplier": 0.93,
+          "spawnWeight": 2
+        },
+        {
+          "maxHealth": 270.0,
+          "damageMultiplier": 4.39,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 1.03,
+          "spawnWeight": 2
+        }
+      ],
+      "currencyDrop": {
+        "gold": 20,
+        "gems": 1
+      },
+      "dropTableIds": [
+        "dt_elite_cache"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_large_charger_behavior"
+    },
+    {
+      "id": "hooker",
+      "name": "Hooker",
+      "type": "Enemy",
+      "role": "Melee",
+      "symbol": "h",
+      "color": "#ec4899",
+      "behavior": "Rusher",
+      "stats": {
+        "hp": 95,
+        "attack": 25,
+        "defense": 4,
+        "speed": 360,
+        "range": 240,
+        "cooldown": 1.1,
+        "chaserange": 8500,
+        "spread": 200,
+        "sidestep": 40
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 71.2,
+          "damageMultiplier": 0.88,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 1.08,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 95.0,
+          "damageMultiplier": 1.25,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 1.2,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 142.5,
+          "damageMultiplier": 1.69,
+          "dodgeChance": 55,
+          "moveSpeedMultiplier": 1.32,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_hooker_behavior"
+    },
+    {
+      "id": "sploder",
+      "name": "Sploder",
+      "type": "Enemy",
+      "role": "Charger",
+      "symbol": "*",
+      "color": "#dc2626",
+      "behavior": "Suicide Bomber",
+      "stats": {
+        "hp": 80,
+        "attack": 85,
+        "defense": 2,
+        "speed": 320,
+        "range": 320,
+        "cooldown": 0,
+        "chaserange": 9000,
+        "spread": 180,
+        "sidestep": 25
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 60.0,
+          "damageMultiplier": 2.97,
+          "dodgeChance": 15,
+          "moveSpeedMultiplier": 0.96,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 80.0,
+          "damageMultiplier": 4.25,
+          "dodgeChance": 25,
+          "moveSpeedMultiplier": 1.07,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 120.0,
+          "damageMultiplier": 5.74,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 1.17,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_sploder_behavior"
+    },
+    {
+      "id": "archer",
+      "name": "Archer",
+      "type": "Enemy",
+      "role": "Ranged",
+      "symbol": "a",
+      "color": "#22c55e",
+      "behavior": "Ranged Kiter",
+      "stats": {
+        "hp": 90,
+        "attack": 15,
+        "defense": 4,
+        "speed": 290,
+        "range": 2600,
+        "cooldown": 1.6,
+        "chaserange": 8000,
+        "spread": 0,
+        "sidestep": 40
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 67.5,
+          "damageMultiplier": 0.52,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 0.87,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 90.0,
+          "damageMultiplier": 0.75,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 0.97,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 135.0,
+          "damageMultiplier": 1.01,
+          "dodgeChance": 55,
+          "moveSpeedMultiplier": 1.06,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {
+        "gold": 8
+      },
+      "dropTableIds": [
+        "dt_common_trash"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_archer_behavior"
+    },
+    {
+      "id": "mage",
+      "name": "Mage",
+      "type": "Enemy",
+      "role": "Caster",
+      "symbol": "M",
+      "color": "#8b5cf6",
+      "behavior": "Caster",
+      "stats": {
+        "hp": 85,
+        "attack": 22,
+        "defense": 3,
+        "speed": 280,
+        "range": 2000,
+        "cooldown": 2.0,
+        "chaserange": 8000,
+        "spread": 0,
+        "sidestep": 40
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 63.8,
+          "damageMultiplier": 0.77,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 0.84,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 85.0,
+          "damageMultiplier": 1.1,
+          "dodgeChance": 40,
+          "moveSpeedMultiplier": 0.93,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 127.5,
+          "damageMultiplier": 1.49,
+          "dodgeChance": 55,
+          "moveSpeedMultiplier": 1.03,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_elite_cache"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_mage_behavior"
+    },
+    {
+      "id": "grenadier",
+      "name": "Grenadier",
+      "type": "Enemy",
+      "role": "Ranged",
+      "symbol": "g",
+      "color": "#14b8a6",
+      "behavior": "Lobber",
+      "stats": {
+        "hp": 100,
+        "attack": 28,
+        "defense": 6,
+        "speed": 285,
+        "range": 2200,
+        "cooldown": 2.4,
+        "chaserange": 8500,
+        "spread": 0,
+        "sidestep": 35
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 75.0,
+          "damageMultiplier": 0.98,
+          "dodgeChance": 25,
+          "moveSpeedMultiplier": 0.85,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 100.0,
+          "damageMultiplier": 1.4,
+          "dodgeChance": 35,
+          "moveSpeedMultiplier": 0.95,
+          "spawnWeight": 1
+        },
+        {
+          "maxHealth": 150.0,
+          "damageMultiplier": 1.89,
+          "dodgeChance": 50,
+          "moveSpeedMultiplier": 1.04,
+          "spawnWeight": 1
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [
+        "dt_elite_cache"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_grenadier_behavior"
+    },
+    {
+      "id": "boss",
+      "name": "Boss",
+      "type": "Boss",
+      "role": "Melee",
+      "symbol": "B",
+      "color": "#b91c1c",
+      "behavior": "Boss Slam",
+      "stats": {
+        "hp": 500,
+        "attack": 50,
+        "defense": 15,
+        "speed": 260,
+        "range": 320,
+        "cooldown": 2.0,
+        "chaserange": 9500,
+        "spread": 300,
+        "sidestep": 30
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 375.0,
+          "damageMultiplier": 1.75,
+          "dodgeChance": 20,
+          "moveSpeedMultiplier": 0.78,
+          "spawnWeight": 5
+        },
+        {
+          "maxHealth": 500.0,
+          "damageMultiplier": 2.5,
+          "dodgeChance": 30,
+          "moveSpeedMultiplier": 0.87,
+          "spawnWeight": 5
+        },
+        {
+          "maxHealth": 750.0,
+          "damageMultiplier": 3.38,
+          "dodgeChance": 45,
+          "moveSpeedMultiplier": 0.95,
+          "spawnWeight": 5
+        }
+      ],
+      "currencyDrop": {
+        "gold": 100,
+        "gems": 5,
+        "keys": 1
+      },
+      "dropTableIds": [
+        "dt_boss_hoard"
+      ],
+      "bonusDrops": [],
+      "verseClass": "enemy_boss_behavior"
+    },
+    {
+      "id": "wizard_bob",
+      "name": "Wizard Bob",
+      "type": "Friendly",
+      "role": "Support",
+      "symbol": "W",
+      "color": "#38bdf8",
+      "behavior": "Friendly Caster",
+      "stats": {
+        "hp": 120,
+        "attack": 0,
+        "defense": 8,
+        "speed": 250,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "difficultyStats": [
+        {
+          "maxHealth": 90.0,
+          "damageMultiplier": 0.1,
+          "dodgeChance": 0,
+          "moveSpeedMultiplier": 0.75,
+          "spawnWeight": 0
+        },
+        {
+          "maxHealth": 120.0,
+          "damageMultiplier": 0.1,
+          "dodgeChance": 0,
+          "moveSpeedMultiplier": 0.83,
+          "spawnWeight": 0
+        },
+        {
+          "maxHealth": 180.0,
+          "damageMultiplier": 0.1,
+          "dodgeChance": 15,
+          "moveSpeedMultiplier": 0.92,
+          "spawnWeight": 0
+        }
+      ],
+      "currencyDrop": {},
+      "dropTableIds": [],
+      "bonusDrops": [],
+      "verseClass": "friendly_wizard_bob"
+    }
+  ],
+  "items": [
+    {
+      "id": "gold_purse",
+      "name": "Gold Purse",
+      "category": "Currency",
+      "symbol": "G",
+      "color": "#fbbf24",
+      "desc": "A small purse of coins.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "currencyReward": {
+        "gold": 25
+      },
+      "price": {
+        "currencyId": "gold",
+        "amount": 0
+      }
+    },
+    {
+      "id": "health_potion",
+      "name": "Health Potion",
+      "category": "Health",
+      "symbol": "+",
+      "color": "#ef4444",
+      "desc": "Restore 25 HP on pickup.",
+      "stats": {
+        "hp": 25,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "currencyReward": {},
+      "price": {
+        "currencyId": "gold",
+        "amount": 15
+      }
+    },
+    {
+      "id": "damage_charm",
+      "name": "Damage Charm",
+      "category": "Damage",
+      "symbol": "\u2694",
+      "color": "#f97316",
+      "desc": "+5 attack damage for the rest of the run.",
+      "stats": {
+        "hp": 0,
+        "attack": 5,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      }
+    },
+    {
+      "id": "iron_shield",
+      "name": "Iron Shield",
+      "category": "Shield",
+      "symbol": "\ud83d\udee1",
+      "color": "#64748b",
+      "desc": "+8 defense.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 8,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      }
+    },
+    {
+      "id": "swift_boots",
+      "name": "Swift Boots",
+      "category": "Speed",
+      "symbol": "\u00bb",
+      "color": "#22c55e",
+      "desc": "+40 move speed.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 40,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      }
+    },
+    {
+      "id": "scroll_burn_infusion",
+      "name": "Scroll: Burn Infusion",
+      "category": "Scroll",
+      "symbol": "F",
+      "color": "#ef4444",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. On hit, apply Burn stacks. At 5 stacks: Ignite.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "burn_infusion",
+      "element": "Fire",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_burn_infusion"
+    },
+    {
+      "id": "scroll_cinder_nova",
+      "name": "Scroll: Cinder Nova",
+      "category": "Scroll",
+      "symbol": "N",
+      "color": "#f97316",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. Charged ability: ignites everything around you and doubles burn ticks for 6 seconds.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "cinder_nova",
+      "element": "Fire",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_cinder_nova"
+    },
+    {
+      "id": "scroll_chill_infusion",
+      "name": "Scroll: Chill Infusion",
+      "category": "Scroll",
+      "symbol": "I",
+      "color": "#38bdf8",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. On hit, apply Chill stacks. At 5 stacks: Frozen.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "chill_infusion",
+      "element": "Ice",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_chill_infusion"
+    },
+    {
+      "id": "scroll_frost_field",
+      "name": "Scroll: Frost Field",
+      "category": "Scroll",
+      "symbol": "Z",
+      "color": "#0ea5e9",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. Charged ability: zone that chills everything inside continuously.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "frost_field",
+      "element": "Ice",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_frost_field"
+    },
+    {
+      "id": "scroll_charge_infusion",
+      "name": "Scroll: Charge Infusion",
+      "category": "Scroll",
+      "symbol": "L",
+      "color": "#facc15",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. On hit, apply Charge stacks. At 5 stacks: Overload.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "charge_infusion",
+      "element": "Lightning",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_charge_infusion"
+    },
+    {
+      "id": "scroll_storm_call",
+      "name": "Scroll: Storm Call",
+      "category": "Scroll",
+      "symbol": "K",
+      "color": "#eab308",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. Charged ability: strikes the 6 highest charge targets on screen.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "storm_call",
+      "element": "Lightning",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_storm_call"
+    },
+    {
+      "id": "scroll_decay_infusion",
+      "name": "Scroll: Decay Infusion",
+      "category": "Scroll",
+      "symbol": "V",
+      "color": "#a855f7",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. On hit, apply Decay stacks. At 5 stacks: Collapse.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "decay_infusion",
+      "element": "Void",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_decay_infusion"
+    },
+    {
+      "id": "scroll_singularity",
+      "name": "Scroll: Singularity",
+      "category": "Scroll",
+      "symbol": "Q",
+      "color": "#7c3aed",
+      "desc": "Reusable scroll. Slot onto any open weapon power slot. Charged ability: throws a rift that pulls, holds, and drains everything caught.",
+      "stats": {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "range": 0,
+        "cooldown": 0,
+        "chaserange": 0,
+        "spread": 0,
+        "sidestep": 0
+      },
+      "wizardryId": "singularity",
+      "element": "Void",
+      "reusable": true,
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_singularity"
+    }
+  ],
+  "dropTables": [
+    {
+      "id": "dt_common_trash",
+      "name": "Common Trash",
+      "color": "#94a3b8",
+      "desc": "Shared loot for basic enemies.",
+      "entries": [
+        {
+          "itemId": "health_potion",
+          "chance": 35.0,
+          "weight": 3.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        },
+        {
+          "itemId": "gold_purse",
+          "chance": 60.0,
+          "weight": 5.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        },
+        {
+          "itemId": "swift_boots",
+          "chance": 8.0,
+          "weight": 1.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        }
+      ]
+    },
+    {
+      "id": "dt_elite_cache",
+      "name": "Elite Cache",
+      "color": "#f59e0b",
+      "desc": "Richer shared table for elites.",
+      "entries": [
+        {
+          "itemId": "damage_charm",
+          "chance": 40.0,
+          "weight": 2.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        },
+        {
+          "itemId": "iron_shield",
+          "chance": 35.0,
+          "weight": 2.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        },
+        {
+          "itemId": "health_potion",
+          "chance": 70.0,
+          "weight": 3.0,
+          "qtyMin": 1,
+          "qtyMax": 2,
+          "guaranteed": false
+        },
+        {
+          "itemId": "gold_purse",
+          "chance": 100.0,
+          "weight": 4.0,
+          "qtyMin": 1,
+          "qtyMax": 2,
+          "guaranteed": true
+        }
+      ]
+    },
+    {
+      "id": "dt_boss_hoard",
+      "name": "Boss Hoard",
+      "color": "#ef4444",
+      "desc": "Boss shared table \u2014 high value, often guaranteed.",
+      "entries": [
+        {
+          "itemId": "damage_charm",
+          "chance": 100.0,
+          "weight": 2.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": true
+        },
+        {
+          "itemId": "iron_shield",
+          "chance": 80.0,
+          "weight": 2.0,
+          "qtyMin": 1,
+          "qtyMax": 1,
+          "guaranteed": false
+        },
+        {
+          "itemId": "gold_purse",
+          "chance": 100.0,
+          "weight": 3.0,
+          "qtyMin": 2,
+          "qtyMax": 4,
+          "guaranteed": true
+        },
+        {
+          "itemId": "health_potion",
+          "chance": 100.0,
+          "weight": 2.0,
+          "qtyMin": 1,
+          "qtyMax": 3,
+          "guaranteed": true
+        }
+      ]
+    }
+  ],
+  "weapons": [
+    {
+      "id": "service_pistol",
+      "name": "Service Pistol",
+      "symbol": "S",
+      "color": "#f59e0b",
+      "category": "Pistol",
+      "desc": "Starter semi-auto. Tapping beats spamming \u2014 free crits reward patience at hour ten.",
+      "fireIdentity": "Semi auto. Any shot fired after a 0.4s pause is a guaranteed crit.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Ice"
+      ],
+      "starter": true,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Service",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_ServicePistol",
+      "icon": "assets/weapons/pistol.svg",
+      "verseClass": "weapon_service_pistol",
+      "upgrades": []
+    },
+    {
+      "id": "hand_cannon",
+      "name": "Hand Cannon",
+      "symbol": "H",
+      "color": "#ef4444",
+      "category": "Pistol",
+      "desc": "Six shots, heavy damage, real knockback. Overpressure pierce after every reload.",
+      "fireIdentity": "Every reload chambers one Overpressure round that pierces through a target and keeps going.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Void"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_HandCannon",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_HandCannon",
+      "icon": "assets/weapons/pistol.svg",
+      "verseClass": "weapon_hand_cannon",
+      "upgrades": []
+    },
+    {
+      "id": "machine_pistol",
+      "name": "Machine Pistol",
+      "symbol": "M",
+      "color": "#22c55e",
+      "category": "Pistol",
+      "desc": "Full auto on a heat gauge. Hold longer for more damage, pay with wider accuracy.",
+      "fireIdentity": "Full auto on a heat gauge. Accuracy widens as heat climbs but damage climbs with it.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Fire",
+        "Lightning"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Machine",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_MachinePistol",
+      "icon": "assets/weapons/pistol.svg",
+      "verseClass": "weapon_machine_pistol",
+      "upgrades": []
+    },
+    {
+      "id": "paradox",
+      "name": "Paradox",
+      "symbol": "P",
+      "color": "#94a3b8",
+      "category": "Pistol",
+      "desc": "Time signature pistol. Every shot echoes 1.5s later at the same point in space.",
+      "fireIdentity": "Every shot fires twice \u2014 once now, and an echo 1.5 seconds later at the exact same point in space.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "stasis_field",
+          "equippedPowerId": "stasis_field",
+          "label": "Stasis Field"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Arc",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Paradox",
+      "icon": "assets/weapons/pistol.svg",
+      "verseClass": "weapon_paradox",
+      "upgrades": []
+    },
+    {
+      "id": "hourglass",
+      "name": "Hourglass",
+      "symbol": "G",
+      "color": "#64748b",
+      "category": "Pistol",
+      "desc": "Time signature pistol. Accelerates aging; kills chamber a round instantly.",
+      "fireIdentity": "Damage scales with how much health the target is missing. Kills chamber a round instantly, no reload.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "rewind",
+          "equippedPowerId": "rewind",
+          "label": "Rewind"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_Pistol_Reaper",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Hourglass",
+      "icon": "assets/weapons/pistol.svg",
+      "verseClass": "weapon_hourglass",
+      "upgrades": []
+    },
+    {
+      "id": "vanguard",
+      "name": "Vanguard",
+      "symbol": "V",
+      "color": "#f97316",
+      "category": "Assault Rifle",
+      "desc": "Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output. ARs keep a target locked down while the party sets up reactions.",
+      "fireIdentity": "Full auto that tightens instead of widening. After one second of held fire, spread drops to zero and damage ramps.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Fire"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Vanguard",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Vanguard",
+      "icon": "assets/weapons/assault_rifle.svg",
+      "verseClass": "weapon_vanguard",
+      "upgrades": []
+    },
+    {
+      "id": "tribeam",
+      "name": "Tribeam",
+      "symbol": "T",
+      "color": "#38bdf8",
+      "category": "Assault Rifle",
+      "desc": "Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output. ARs keep a target locked down while the party sets up reactions.",
+      "fireIdentity": "Three round burst. All three landing refunds the ammo and applies double element stacks.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Ice",
+        "Void"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Tribeam",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Tribeam",
+      "icon": "assets/weapons/assault_rifle.svg",
+      "verseClass": "weapon_tribeam",
+      "upgrades": []
+    },
+    {
+      "id": "longshot",
+      "name": "Longshot",
+      "symbol": "L",
+      "color": "#facc15",
+      "category": "Assault Rifle",
+      "desc": "Class trait Suppression: eight continuous hits on the same target makes it flinch and cut its damage output. ARs keep a target locked down while the party sets up reactions.",
+      "fireIdentity": "Semi auto marksman. Damage scales upward with distance to target.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Lightning"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Longshot",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Longshot",
+      "icon": "assets/weapons/assault_rifle.svg",
+      "verseClass": "weapon_longshot",
+      "upgrades": []
+    },
+    {
+      "id": "recursion",
+      "name": "Recursion",
+      "symbol": "R",
+      "color": "#94a3b8",
+      "category": "Assault Rifle",
+      "desc": "Time signature AR. Class trait Suppression still applies \u2014 keep targets locked while Loop replays your fire.",
+      "fireIdentity": "Every sixth shot instantly replays the previous five shots at once.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "loop",
+          "equippedPowerId": "loop",
+          "label": "Loop"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Recursion",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Recursion",
+      "icon": "assets/weapons/assault_rifle.svg",
+      "verseClass": "weapon_recursion",
+      "upgrades": []
+    },
+    {
+      "id": "prophecy",
+      "name": "Prophecy",
+      "symbol": "Y",
+      "color": "#cbd5e1",
+      "category": "Assault Rifle",
+      "desc": "Time signature AR. Class trait Suppression still applies \u2014 never miss a moving enemy while the party sets up.",
+      "fireIdentity": "Shots resolve half a second ahead, so they land where the target will be. Never misses a moving enemy.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "precognition",
+          "equippedPowerId": "precognition",
+          "label": "Precognition"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_AR_Prophecy",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Prophecy",
+      "icon": "assets/weapons/assault_rifle.svg",
+      "verseClass": "weapon_prophecy",
+      "upgrades": []
+    },
+    {
+      "id": "breacher",
+      "name": "Breacher",
+      "symbol": "B",
+      "color": "#a855f7",
+      "category": "Shotgun",
+      "desc": "Class trait Saturation: every pellet applies element stacks individually. A full body hit up close procs a status instantly. Shotguns are the fastest status applier and start reactions for everyone else.",
+      "fireIdentity": "Pump action, tight cone, heavy stagger. Loads shell by shell so you can cancel the reload at any point.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Void"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Breacher",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Breacher",
+      "icon": "assets/weapons/shotgun.svg",
+      "verseClass": "weapon_breacher",
+      "upgrades": []
+    },
+    {
+      "id": "flechette",
+      "name": "Flechette",
+      "symbol": "F",
+      "color": "#ef4444",
+      "category": "Shotgun",
+      "desc": "Class trait Saturation: every pellet applies element stacks individually. A full body hit up close procs a status instantly. Shotguns are the fastest status applier and start reactions for everyone else.",
+      "fireIdentity": "Very wide cone, very high pellet count. Useless past ten meters, instant max stacks inside it.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Fire",
+        "Ice"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Flechette",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Flechette",
+      "icon": "assets/weapons/shotgun.svg",
+      "verseClass": "weapon_flechette",
+      "upgrades": []
+    },
+    {
+      "id": "ripper",
+      "name": "Ripper",
+      "symbol": "I",
+      "color": "#facc15",
+      "category": "Shotgun",
+      "desc": "Class trait Saturation: every pellet applies element stacks individually. A full body hit up close procs a status instantly. Shotguns are the fastest status applier and start reactions for everyone else.",
+      "fireIdentity": "Semi auto, fewer pellets per shot. Consecutive hits tighten the cone toward a slug.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Lightning"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Ripper",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Ripper",
+      "icon": "assets/weapons/shotgun.svg",
+      "verseClass": "weapon_ripper",
+      "upgrades": []
+    },
+    {
+      "id": "echo",
+      "name": "Echo",
+      "symbol": "E",
+      "color": "#94a3b8",
+      "category": "Shotgun",
+      "desc": "Time signature shotgun. Class trait Saturation still applies \u2014 pellets stack status while Aftershock records your damage.",
+      "fireIdentity": "One trigger pull, three blasts. The shot repeats twice more at the same point in space, half a second apart.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "aftershock",
+          "equippedPowerId": "aftershock",
+          "label": "Aftershock"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Echo",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Echo",
+      "icon": "assets/weapons/shotgun.svg",
+      "verseClass": "weapon_echo",
+      "upgrades": []
+    },
+    {
+      "id": "unmake",
+      "name": "Unmake",
+      "symbol": "U",
+      "color": "#64748b",
+      "category": "Shotgun",
+      "desc": "Time signature shotgun. Class trait Saturation still applies \u2014 strip defenses while Regression reverts elites.",
+      "fireIdentity": "Each pellet strips one layer of armor, shield, or buff from what it hits.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "regression",
+          "equippedPowerId": "regression",
+          "label": "Regression"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SG_Unmake",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Unmake",
+      "icon": "assets/weapons/shotgun.svg",
+      "verseClass": "weapon_unmake",
+      "upgrades": []
+    },
+    {
+      "id": "shred",
+      "name": "Shred",
+      "symbol": "S",
+      "color": "#ef4444",
+      "category": "SMG",
+      "desc": "Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed. SMGs are the only class that fires at full accuracy while sprinting or dashing.",
+      "fireIdentity": "Consecutive hits on the same target stack a damage bonus. Miss and the stacks decay.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Fire"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Shred",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Shred",
+      "icon": "assets/weapons/smg.svg",
+      "verseClass": "weapon_shred",
+      "upgrades": []
+    },
+    {
+      "id": "splitfire",
+      "name": "Splitfire",
+      "symbol": "P",
+      "color": "#facc15",
+      "category": "SMG",
+      "desc": "Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed. SMGs are the only class that fires at full accuracy while sprinting or dashing.",
+      "fireIdentity": "Two streams that converge at a fixed distance. Standing at the convergence point doubles your damage.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Lightning"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Splitfire",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Splitfire",
+      "icon": "assets/weapons/smg.svg",
+      "verseClass": "weapon_splitfire",
+      "upgrades": []
+    },
+    {
+      "id": "flux",
+      "name": "Flux",
+      "symbol": "X",
+      "color": "#38bdf8",
+      "category": "SMG",
+      "desc": "Class trait Haste: sustained fire builds Haste stacks that raise movement and reload speed. SMGs are the only class that fires at full accuracy while sprinting or dashing.",
+      "fireIdentity": "Damage climbs as the magazine empties. The last quarter of the mag hits hardest.",
+      "slotPolicy": "infusable",
+      "powerSlots": [
+        {
+          "id": "slot_element",
+          "index": 1,
+          "kind": "open",
+          "accepts": [
+            "element_infusion",
+            "charged"
+          ],
+          "rerollPolicy": "hub",
+          "equippedPowerId": null,
+          "label": "Element Infusion"
+        }
+      ],
+      "suggestedElements": [
+        "Ice",
+        "Void"
+      ],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Flux",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Flux",
+      "icon": "assets/weapons/smg.svg",
+      "verseClass": "weapon_flux",
+      "upgrades": []
+    },
+    {
+      "id": "tempo",
+      "name": "Tempo",
+      "symbol": "T",
+      "color": "#e2e8f0",
+      "category": "SMG",
+      "desc": "Time signature SMG. Class trait Haste still applies \u2014 fire rate climbs while Accelerate doubles your tempo.",
+      "fireIdentity": "Fire rate climbs the longer you hold the trigger with no cap. Release and it resets to base.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "accelerate",
+          "equippedPowerId": "accelerate",
+          "label": "Accelerate"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Tempo",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Tempo",
+      "icon": "assets/weapons/smg.svg",
+      "verseClass": "weapon_tempo",
+      "upgrades": []
+    },
+    {
+      "id": "revenant",
+      "name": "Revenant",
+      "symbol": "V",
+      "color": "#475569",
+      "category": "SMG",
+      "desc": "Time signature SMG. Class trait Haste still applies \u2014 leave afterimages while Second Self mirrors your fire.",
+      "fireIdentity": "Every tenth kill leaves an afterimage of you that fires one burst at the nearest enemy.",
+      "slotPolicy": "locked_power",
+      "powerSlots": [
+        {
+          "id": "slot_signature",
+          "index": 1,
+          "kind": "locked",
+          "accepts": [],
+          "rerollPolicy": "none",
+          "lockedPowerId": "second_self",
+          "equippedPowerId": "second_self",
+          "label": "Second Self"
+        }
+      ],
+      "suggestedElements": [],
+      "starter": false,
+      "uefnAsset": "/Roguelike/Weapons/PlayerWeapons/WID_Player_SMG_Revenant",
+      "uefnIcon": "/Roguelike/Weapons/Icons/T_Icon_Revenant",
+      "icon": "assets/weapons/smg.svg",
+      "verseClass": "weapon_revenant",
+      "upgrades": []
+    }
+  ],
+  "wizardry": [
+    {
+      "id": "burn_infusion",
+      "name": "Burn Infusion",
+      "element": "Fire",
+      "kind": "element_infusion",
+      "desc": "On hit, apply Burn stacks. At 5 stacks: Ignite.",
+      "color": "#ef4444",
+      "symbol": "F",
+      "stackName": "Burn",
+      "stackThreshold": 5,
+      "procName": "Ignite",
+      "procDesc": "Damage over time that spreads to enemies standing close.",
+      "chargedName": "",
+      "chargedDesc": "",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_burn_infusion",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_burn_infusion",
+      "category": "Wizardry"
+    },
+    {
+      "id": "cinder_nova",
+      "name": "Cinder Nova",
+      "element": "Fire",
+      "kind": "charged",
+      "desc": "Charged ability: ignites everything around you and doubles burn ticks for 6 seconds.",
+      "color": "#f97316",
+      "symbol": "N",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Cinder Nova",
+      "chargedDesc": "Ignites everything around you and doubles burn ticks for 6 seconds.",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_cinder_nova",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_cinder_nova",
+      "category": "Wizardry"
+    },
+    {
+      "id": "chill_infusion",
+      "name": "Chill Infusion",
+      "element": "Ice",
+      "kind": "element_infusion",
+      "desc": "On hit, apply Chill stacks. At 5 stacks: Frozen.",
+      "color": "#38bdf8",
+      "symbol": "I",
+      "stackName": "Chill",
+      "stackThreshold": 5,
+      "procName": "Frozen",
+      "procDesc": "Target locked in place and takes 2x crit damage until it breaks.",
+      "chargedName": "",
+      "chargedDesc": "",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_chill_infusion",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_chill_infusion",
+      "category": "Wizardry"
+    },
+    {
+      "id": "frost_field",
+      "name": "Frost Field",
+      "element": "Ice",
+      "kind": "charged",
+      "desc": "Charged ability: zone that chills everything inside continuously.",
+      "color": "#0ea5e9",
+      "symbol": "Z",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Frost Field",
+      "chargedDesc": "Zone that chills everything inside continuously.",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_frost_field",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_frost_field",
+      "category": "Wizardry"
+    },
+    {
+      "id": "charge_infusion",
+      "name": "Charge Infusion",
+      "element": "Lightning",
+      "kind": "element_infusion",
+      "desc": "On hit, apply Charge stacks. At 5 stacks: Overload.",
+      "color": "#facc15",
+      "symbol": "L",
+      "stackName": "Charge",
+      "stackThreshold": 5,
+      "procName": "Overload",
+      "procDesc": "Bursts and jumps to 3 nearby enemies, applying charge to them.",
+      "chargedName": "",
+      "chargedDesc": "",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_charge_infusion",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_charge_infusion",
+      "category": "Wizardry"
+    },
+    {
+      "id": "storm_call",
+      "name": "Storm Call",
+      "element": "Lightning",
+      "kind": "charged",
+      "desc": "Charged ability: strikes the 6 highest charge targets on screen.",
+      "color": "#eab308",
+      "symbol": "K",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Storm Call",
+      "chargedDesc": "Strikes the 6 highest charge targets on screen.",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_storm_call",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_storm_call",
+      "category": "Wizardry"
+    },
+    {
+      "id": "decay_infusion",
+      "name": "Decay Infusion",
+      "element": "Void",
+      "kind": "element_infusion",
+      "desc": "On hit, apply Decay stacks. At 5 stacks: Collapse.",
+      "color": "#a855f7",
+      "symbol": "V",
+      "stackName": "Decay",
+      "stackThreshold": 5,
+      "procName": "Collapse",
+      "procDesc": "Pulls nearby enemies toward the target and cuts their damage output.",
+      "chargedName": "",
+      "chargedDesc": "",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_decay_infusion",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_decay_infusion",
+      "category": "Wizardry"
+    },
+    {
+      "id": "singularity",
+      "name": "Singularity",
+      "element": "Void",
+      "kind": "charged",
+      "desc": "Charged ability: throws a rift that pulls, holds, and drains everything caught.",
+      "color": "#7c3aed",
+      "symbol": "Q",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Singularity",
+      "chargedDesc": "Throws a rift that pulls, holds, and drains everything caught.",
+      "findable": true,
+      "buyable": true,
+      "reusable": true,
+      "customItemId": "scroll_singularity",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_singularity",
+      "category": "Wizardry"
+    },
+    {
+      "id": "stasis_field",
+      "name": "Stasis Field",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "Time stops inside a zone. Enemies hold still; all damage dealt is stored and lands at once when the field drops.",
+      "color": "#94a3b8",
+      "symbol": "T",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Stasis Field",
+      "chargedDesc": "Time stops inside a zone. Damage is stored and lands when the field drops.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_stasis_field",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_stasis_field",
+      "category": "Wizardry"
+    },
+    {
+      "id": "rewind",
+      "name": "Rewind",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "Your health, ammo, and position return to what they were 5 seconds ago.",
+      "color": "#64748b",
+      "symbol": "R",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Rewind",
+      "chargedDesc": "Health, ammo, and position snap back 5 seconds.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_rewind",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_rewind",
+      "category": "Wizardry"
+    },
+    {
+      "id": "loop",
+      "name": "Loop",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "Records four seconds of your fire, then replays it on its own while you do something else.",
+      "color": "#94a3b8",
+      "symbol": "L",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Loop",
+      "chargedDesc": "Records four seconds of your fire, then replays it on its own while you do something else.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_loop",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_loop",
+      "category": "Wizardry"
+    },
+    {
+      "id": "precognition",
+      "name": "Precognition",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "For six seconds nothing you can see can hit you.",
+      "color": "#cbd5e1",
+      "symbol": "P",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Precognition",
+      "chargedDesc": "For six seconds nothing you can see can hit you.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_precognition",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_precognition",
+      "category": "Wizardry"
+    },
+    {
+      "id": "aftershock",
+      "name": "Aftershock",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "For five seconds everything you deal is recorded, then replays at the same spots three seconds later.",
+      "color": "#94a3b8",
+      "symbol": "A",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Aftershock",
+      "chargedDesc": "For five seconds everything you deal is recorded, then replays at the same spots three seconds later.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_aftershock",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_aftershock",
+      "category": "Wizardry"
+    },
+    {
+      "id": "regression",
+      "name": "Regression",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "Reverts every enemy in front of you to an earlier state, removing shields, armor, and elite modifiers outright.",
+      "color": "#64748b",
+      "symbol": "G",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Regression",
+      "chargedDesc": "Reverts every enemy in front of you to an earlier state, removing shields, armor, and elite modifiers outright.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_regression",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_regression",
+      "category": "Wizardry"
+    },
+    {
+      "id": "accelerate",
+      "name": "Accelerate",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "You move, shoot, and reload at double speed while the world runs normal.",
+      "color": "#e2e8f0",
+      "symbol": "C",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Accelerate",
+      "chargedDesc": "You move, shoot, and reload at double speed while the world runs normal.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_accelerate",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_accelerate",
+      "category": "Wizardry"
+    },
+    {
+      "id": "second_self",
+      "name": "Second Self",
+      "element": "Time",
+      "kind": "locked_signature",
+      "desc": "A time clone appears and mirrors everything you fire for eight seconds.",
+      "color": "#475569",
+      "symbol": "2",
+      "stackName": "",
+      "stackThreshold": 5,
+      "procName": "",
+      "procDesc": "",
+      "chargedName": "Second Self",
+      "chargedDesc": "A time clone appears and mirrors everything you fire for eight seconds.",
+      "findable": false,
+      "buyable": false,
+      "reusable": false,
+      "customItemId": "scroll_second_self",
+      "uefnCustomItem": "",
+      "verseClass": "wizardry_second_self",
+      "category": "Wizardry"
+    }
+  ],
+  "elements": [
+    {
+      "id": "Fire",
+      "name": "Fire",
+      "color": "#ef4444",
+      "stack": "Burn",
+      "proc": "Ignite",
+      "procDesc": "Damage over time that spreads to enemies standing close.",
+      "charged": "Cinder Nova",
+      "chargedDesc": "Ignites everything around you and doubles burn ticks for 6 seconds."
+    },
+    {
+      "id": "Ice",
+      "name": "Ice",
+      "color": "#38bdf8",
+      "stack": "Chill",
+      "proc": "Frozen",
+      "procDesc": "Target locked in place and takes 2x crit damage until it breaks.",
+      "charged": "Frost Field",
+      "chargedDesc": "Zone that chills everything inside continuously."
+    },
+    {
+      "id": "Lightning",
+      "name": "Lightning",
+      "color": "#facc15",
+      "stack": "Charge",
+      "proc": "Overload",
+      "procDesc": "Bursts and jumps to 3 nearby enemies, applying charge to them.",
+      "charged": "Storm Call",
+      "chargedDesc": "Strikes the 6 highest charge targets on screen."
+    },
+    {
+      "id": "Void",
+      "name": "Void",
+      "color": "#a855f7",
+      "stack": "Decay",
+      "proc": "Collapse",
+      "procDesc": "Pulls nearby enemies toward the target and cuts their damage output.",
+      "charged": "Singularity",
+      "chargedDesc": "Throws a rift that pulls, holds, and drains everything caught."
+    },
+    {
+      "id": "Time",
+      "name": "Time",
+      "color": "#94a3b8",
+      "stack": "",
+      "proc": "",
+      "procDesc": "Locked signature element \u2014 cannot be infused onto Time pistols.",
+      "charged": "",
+      "chargedDesc": ""
+    }
+  ],
+  "levels": [
+    {
+      "id": "lvl_training_room",
+      "name": "Training Room",
+      "w": 14,
+      "h": 10,
+      "theme": "#6366f1",
+      "threat": "Low",
+      "grid": [
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": {
+              "kind": "npc",
+              "id": "melee_corpse"
+            }
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": {
+              "kind": "item",
+              "id": "damage_charm"
+            }
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": {
+              "kind": "npc",
+              "id": "archer"
+            }
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": {
+              "kind": "npc",
+              "id": "sword_corpse"
+            }
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": {
+              "kind": "item",
+              "id": "health_potion"
+            }
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "floor",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ],
+        [
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "door",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          },
+          {
+            "terrain": "wall",
+            "entity": null
+          }
+        ]
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "id": "chk_entrance",
+      "name": "Entrance",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "entrance",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [
+        {
+          "group": "A",
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "wall",
+          "wall"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_exit",
+      "name": "Exit",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "exit",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [
+        {
+          "group": "A",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "grid": [
+        [
+          "wall",
+          "wall"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_objective",
+      "name": "Objective Room",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "objective",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [
+        {
+          "group": "B",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "group": "B",
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_room_ns",
+      "name": "Room N-S",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "room",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.4,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [
+        {
+          "group": "A",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_room_cross",
+      "name": "Room Cross",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "room",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 0.8,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [
+        {
+          "group": "A",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_conn_straight",
+      "name": "Straight Hall",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "connector",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 2.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_conn_l",
+      "name": "L Hall",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "connector",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "wall",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_conn_t",
+      "name": "T Junction",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "connector",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 0.9,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "door",
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_deadend",
+      "name": "Dead End",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "inside",
+      "role": "deadend",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 0.7,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "door",
+          "door"
+        ],
+        [
+          "wall",
+          "wall"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_cap",
+      "name": "Cap",
+      "prefabPath": "",
+      "cw": 1,
+      "ch": 1,
+      "space": "inside",
+      "role": "cap",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "door",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 0.2,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "door"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_filler",
+      "name": "Filler Wall",
+      "prefabPath": "",
+      "cw": 1,
+      "ch": 1,
+      "space": "inside",
+      "role": "filler",
+      "roof": true,
+      "sockets": {
+        "N": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0
+      ],
+      "mirror": false,
+      "weight": 0.1,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "ruins"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "wall"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_entrance",
+      "name": "Field Entrance",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "entrance",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "floor",
+          "floor"
+        ],
+        [
+          "wall",
+          "wall"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_exit",
+      "name": "Field Exit",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "exit",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "wall",
+          "wall"
+        ],
+        [
+          "floor",
+          "floor"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_room",
+      "name": "Outdoor Clearing",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "room",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "floor",
+          "floor"
+        ],
+        [
+          "floor",
+          "floor"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_conn",
+      "name": "Field Path",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "connector",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.5,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "floor",
+          "floor"
+        ],
+        [
+          "floor",
+          "floor"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_objective",
+      "name": "Field Objective",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "objective",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "floor",
+          "floor"
+        ],
+        [
+          "floor",
+          "floor"
+        ]
+      ],
+      "gridAuto": true
+    },
+    {
+      "id": "chk_outdoor_deadend",
+      "name": "Field Cul-de-sac",
+      "prefabPath": "",
+      "cw": 2,
+      "ch": 2,
+      "space": "outside",
+      "role": "deadend",
+      "roof": false,
+      "sockets": {
+        "N": [
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "open",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "E": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "S": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ],
+        "W": [
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          },
+          {
+            "kind": "wall",
+            "size": 1,
+            "height_step": 0,
+            "z": 0
+          }
+        ]
+      },
+      "rotations": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "mirror": false,
+      "weight": 1.0,
+      "minCount": null,
+      "maxCount": null,
+      "tags": [
+        "fields"
+      ],
+      "slots": [],
+      "grid": [
+        [
+          "floor",
+          "floor"
+        ],
+        [
+          "wall",
+          "wall"
+        ]
+      ],
+      "gridAuto": true
+    }
+  ],
+  "genTemplates": [
+    {
+      "id": "gen_linear_gauntlet",
+      "name": "Linear Gauntlet",
+      "space": "inside",
+      "seed": 1337,
+      "spine": [
+        "entrance",
+        "connector",
+        "room",
+        "connector",
+        "room",
+        "connector",
+        "objective",
+        "connector",
+        "room",
+        "exit"
+      ],
+      "openSocketScope": "last",
+      "branchBudget": 0,
+      "branchDepthMax": 0,
+      "tags": [
+        "ruins"
+      ],
+      "maxAttempts": 40,
+      "metrics": {
+        "mainPathLen": [
+          6,
+          40
+        ]
+      }
+    },
+    {
+      "id": "gen_crypt",
+      "name": "Crypt",
+      "space": "inside",
+      "seed": 42,
+      "spine": [
+        "entrance",
+        "connector",
+        "room",
+        "connector",
+        "objective",
+        "connector",
+        "room",
+        "exit"
+      ],
+      "openSocketScope": "all",
+      "branchBudget": 3,
+      "branchDepthMax": 2,
+      "tags": [
+        "ruins"
+      ],
+      "maxAttempts": 40,
+      "metrics": {
+        "mainPathLen": [
+          5,
+          30
+        ]
+      }
+    },
+    {
+      "id": "gen_open_fields",
+      "name": "Open Fields",
+      "space": "outside",
+      "seed": 99,
+      "spine": [
+        "entrance",
+        "room",
+        "room",
+        "objective",
+        "room",
+        "exit"
+      ],
+      "openSocketScope": "all",
+      "branchBudget": 4,
+      "branchDepthMax": 2,
+      "tags": [
+        "fields"
+      ],
+      "maxAttempts": 40,
+      "metrics": {
+        "mainPathLen": [
+          4,
+          25
+        ]
+      }
+    },
+    {
+      "id": "gen_boss_run",
+      "name": "Boss Run",
+      "space": "inside",
+      "seed": 7,
+      "spine": [
+        "entrance",
+        "connector",
+        "room",
+        "connector",
+        "objective",
+        "exit"
+      ],
+      "openSocketScope": "last",
+      "branchBudget": 1,
+      "branchDepthMax": 1,
+      "tags": [
+        "ruins"
+      ],
+      "maxAttempts": 40,
+      "metrics": {
+        "mainPathLen": [
+          4,
+          16
+        ]
+      }
+    }
+  ],
+  "scene": {
+    "actors": [],
+    "lastSync": null,
+    "listener": "unknown"
+  },
+  "meta": {
+    "activeLevelId": "lvl_training_room",
+    "activeTab": "dashboard",
+    "infusionRerollPolicy": "hub",
+    "weaponClassTraits": {
+      "Pistol": {
+        "name": "Sidearm",
+        "summary": "Flexible sidearms. Open slots take element infusions; locked slots are Time signatures."
+      },
+      "Assault Rifle": {
+        "name": "Suppression",
+        "summary": "Eight continuous hits on the same target makes it flinch and cut its damage output. ARs keep a target locked down while the party sets up reactions."
+      },
+      "Shotgun": {
+        "name": "Saturation",
+        "summary": "Every pellet applies element stacks individually. A full body hit up close procs a status instantly. Shotguns are the fastest status applier and start reactions for everyone else."
+      },
+      "SMG": {
+        "name": "Haste",
+        "summary": "Sustained fire builds Haste stacks that raise movement and reload speed. SMGs are the only class that fires at full accuracy while sprinting or dashing."
+      }
+    }
+  }
+}

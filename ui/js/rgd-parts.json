@@ -1,0 +1,32 @@
+{
+  "parts": [
+    "js/rgd/00-open.js",
+    "js/rgd/01-persist.js",
+    "js/rgd/02-mcp-sim-sync.js",
+    "js/rgd/03-shell.js",
+    "js/rgd/04-currencies.js",
+    "js/rgd/05-progression.js",
+    "js/rgd/06-stats-difficulties.js",
+    "js/rgd/07-catalogue-npcs-items.js",
+    "js/rgd/07b-drop-tables.js",
+    "js/rgd/08-levels.js",
+    "js/rgd/09-mcp-tab.js",
+    "js/rgd/10-weapons.js",
+    "js/rgd/11-wizardry.js",
+    "js/rgd/12-modals-ops-act.js",
+    "js/rgd/14-chunks.js",
+    "js/rgd/15-procgen.js",
+    "js/rgd/16-journeys.js",
+    "js/rgd/17-assets.js",
+    "js/rgd/ui/01-tokens.js",
+    "js/rgd/ui/02-model.js",
+    "js/rgd/ui/03-catalogue.js",
+    "js/rgd/ui/04-render.js",
+    "js/rgd/ui/05-inspector.js",
+    "js/rgd/ui/06-verse.js",
+    "js/rgd/ui/07-tab.js",
+    "js/rgd/ui/08-skill-tree-sync.js",
+    "js/rgd/ui/09-armory-sync.js",
+    "js/rgd/13-boot-export.js"
+  ]
+}
