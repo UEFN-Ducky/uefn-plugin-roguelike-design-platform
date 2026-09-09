@@ -13,6 +13,8 @@ metadata:
 
 # Roguelike Game Design Platform — skill pack
 
+**Tool order (HARD):** 1) Official UEFN MCP first — `ducky_get_status`; when `epic_mcp_online` use nested `unreal__*` (`unreal__list_toolsets` → `unreal__describe_toolset` → `unreal__call_tool`; 5+ ops → ProgrammaticToolset `execute_tool_script`). 2) Ducky listener second (Epic-offline gaps + Ducky-only tools listed in this skill). 3) `execute_python` LAST — never a placement/layout path, even if Epic and listener already failed. Never spawn, move, or assign materials. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 Self-contained roguelike design platform. **No export step** — the plugin's
 central state IS the product. Read every design value through the plugin's own
 `rgd_*` MCP tools and build the live UEFN scene directly through them.
