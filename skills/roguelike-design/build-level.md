@@ -32,7 +32,8 @@ level via `level["assets"]={wall,door,npc,item}`. Unresolved asset → a per-cel
 - Whole map: `rgd_build_level_in_uefn(level_id)` — a **reconciling rebuild**: it
   clears the level's prior plugin actors first, then spawns fresh, so it is
   **idempotent**. Each spawn does `spawn_actor` → `set_actor_label` →
-  `set_actor_folder` → `set_actor_transform`.
+  `set_actor_folder` → `set_actor_transform` (location/rotation; **scale only on
+  props**, never on Fortnite Creative devices).
 
 ## 4. Resize / rebuild safety
 - Resizing (`rgd_update_level` w/h) preserves overlapping cells, drops the rest;

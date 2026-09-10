@@ -1,7 +1,7 @@
 {
   "id": "roguelike-design-platform",
   "kind": "plugin",
-  "version": "1.12.36",
+  "version": "1.12.37",
   "label": "Roguelike Game Design Platform",
   "description": "Roguelike design — Egypt EP_Egypt_* chunks, ThemeTag, Journey Slot_A/B injection, layout parity.",
   "min_app_version": "1.0.0",
