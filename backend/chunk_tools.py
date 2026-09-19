@@ -445,8 +445,8 @@ def register_chunk_tools(
         children = info.get("children") or info.get("entities") or []
         # Also list entities with name filter under selection if children empty
         if not children:
-            listed = listen("list_entities", {"name_filter": "", "limit": 200})
-            children = listed.get("entities") or listed.get("result") or []
+            listed = listen("get_all_actors", {"label_filter": "", "limit": 200})
+            children = listed.get("actors") or listed.get("entities") or listed.get("result") or []
 
         sockets: dict[str, dict[int, str]] = {"N": {}, "E": {}, "S": {}, "W": {}}
         slots = []
@@ -988,8 +988,8 @@ def register_chunk_tools(
         path = str(device_path or "").strip()
         if not path:
             # Auto-find first generation device in level
-            found = listen("find_devices", {"label_filter": "generation", "limit": 20}) or {}
-            items = found.get("devices") or found.get("actors") or found.get("results") or []
+            found = listen("get_all_actors", {"label_filter": "generation", "limit": 20}) or {}
+            items = found.get("actors") or found.get("devices") or found.get("results") or []
             if isinstance(found, list):
                 items = found
             for it in items if isinstance(items, list) else []:

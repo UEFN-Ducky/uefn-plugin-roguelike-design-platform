@@ -323,7 +323,7 @@ def call_tool(name: str = "", args: dict | None = None, **_kwargs):
     if fn is None:
         # Helpful hint when backend wasn't reloaded after an update.
         known = sorted(k for k in _PANEL_TOOL_FNS if "chunk_asset" in k or k.endswith("from_uefn"))
-        hint = (" · known: " + ", ".join(known[:8])) if known else " · restart UEFN-Ducky to reload plugin tools"
+        hint = (" · known: " + ", ".join(known[:8])) if known else " · applies on next start"
         return {"ok": False, "error": "unknown tool: %s%s" % (key, hint)}
     try:
         return {"ok": True, "result": fn(**(args or {}))}
